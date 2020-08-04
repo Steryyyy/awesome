@@ -1,0 +1,1 @@
+local ipairs=ipairs;local a={mouse=mouse}local b={}b.resize_jump_to_corner=true;function b.arrange()end;b.name="floating"return b

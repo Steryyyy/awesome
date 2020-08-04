@@ -1,0 +1,1 @@
+local dbus=dbus;if dbus then dbus.request_name("session","org.awesomewm.awful")end
