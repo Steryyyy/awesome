@@ -443,7 +443,7 @@ end
 end
 else
 
-        tcolor.change_colors(1, "")
+        tcolor.change_colors(1, 1)
 
 end
 
