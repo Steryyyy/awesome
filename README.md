@@ -340,12 +340,12 @@ Left click to start selected entry count down
 
 
 # Gallery
-| Startmen                                                               | Volume module and wallpaper module |
+| Startmenu module and volume mode                                                              | Volume module and wallpaper module |
 | --                                                                     | --                                 |
-| ![startmenu](/home/steryyy/.config/awesome/screenshots/start_menu.jpg) | ![startmenu](/home/steryyy/.config/awesome/screenshots/volume_clients.jpg)|
+| ![startmenu](https://github.com/Steryyyy/awesome/blob/master/screenshots/start_menu.jpg) | ![startmenu](https://github.com/Steryyyy/awesome/blob/master/screenshots/volume_clients.jpg)|
 
 | Notification                                                             | Exit srceen                                                      |
 | --                                                                       | --                                                               |
-| ![startmenu](/home/steryyy/.config/awesome/screenshots/notification.jpg) | ![startmenu](/home/steryyy/.config/awesome/screenshots/exit.jpg) |
+| ![startmenu](https://github.com/Steryyyy/awesome/blob/master/screenshots/notification.jpg) | ![startmenu](https://github.com/Steryyyy/awesome/blob/master/screenshots/exit.jpg) |
 
 
