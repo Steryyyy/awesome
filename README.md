@@ -1,6 +1,7 @@
 
 
-<img src="https://github.com/Steryyyy/awesome/blob/master/screenshots/all.jpg" width="50%">
+<img src="https://github.com/Steryyyy/awesome/blob/master/screenshots/alll.jpg" width="50%">
+
 
 <!-- vim-markdown-toc GFM -->
 
