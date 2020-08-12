@@ -5,7 +5,7 @@ local d = require("my.gears.object")
 local e = require("my.gears.geometry").rectangle;
 local f = require("my.gears.math")
 local g = require("my.gears.table")
-
+local amousec = require('my.awful.mouse.client')
 local pairs = pairs;
 local type = type;
 local ipairs = ipairs;
@@ -511,8 +511,12 @@ function client.object.activate(n, az)
     aA.raise = aA.raise == nil and true or az.raise;
 
         n:emit_signal("request::activate", aA.context or "other", aA)
+if aA.action and aA.action == "mouse_move" then
+    amousec.move(n)
+elseif aA.action and aA.action == "mouse_resize" then
+    amousec.resize(n)
 
-    if aA.action and aA.action == "mouse_center" then
+    elseif aA.action and aA.action == "mouse_center" then
         local aB, aC = mouse.mouse.coords(), n:geometry()
         aB.width, aB.height = 1, 1;
         if not e.area_intersect_area(aC, aB) then

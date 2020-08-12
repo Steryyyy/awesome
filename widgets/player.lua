@@ -46,15 +46,13 @@ widget_next.font='Font Awesome 5 Brands 13'
 local widget_song = wibox.widget.textbox('', false, '#000000')
 local widget_spawn = wibox.widget.textbox(icon_spotify)
 widget_spawn.font ='Font Awesome 5 Brands 13'
--- Players
 
--- Mocp
 
-local function get_volume(vol) return math.floor(65536 * vol / 100) end
--- cmus
+local function to_pulse(vol) return math.floor(65536 * vol / 100) end
 
 local player = {}
 player.color = {'#FF8C00'}
+player.volume =0
 local widget_volume = wibox.widget {
     max_value = 1,
     color = player.color[1],
@@ -82,8 +80,11 @@ player.change = function()
     if player.selected == 'spotify' then
         player.selected = 'cmus'
 
-    else
+    elseif player.selected == "musicpv" then
         player.selected = 'spotify'
+	else
+
+        player.selected = 'musicpv'
     end
     player.hidebuton(false)
 
@@ -98,18 +99,29 @@ end
 -- volume functions
 local function change_volume(a)
 
-    if player.id and player.volume then
-
         player.volume = player.volume + a
-        if player.volume > 100 then
+
+	if player.volume > 100 then
 
             player.volume = 100
         elseif player.volume < 0 then
             player.volume = 0
         end
+if player.selected ~= "musicpv" then
+    if player.id  then
+
 
         awful.spawn.with_shell('pacmd set-sink-input-volume ' .. player.id ..
-                                   ' ' .. get_volume(tonumber(player.volume)))
+                                   ' ' .. to_pulse(tonumber(player.volume)))
+
+end
+else
+
+awful.spawn.with_shell("dbus-send --print-reply=literal --dest=org.mpris.MediaPlayer2.musicpv /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Set string:'org.mpris.MediaPlayer2.Player' string:'Volume' variant:double:"..tostring(player.volume/100))
+
+
+
+
     end
 end
 player.inc = function() change_volume(5) end
@@ -162,6 +174,60 @@ player.cmus_state = function()
 
     end)
 end
+local get_musicpv_title = [[ dbus-send --print-reply=literal --dest=org.mpris.MediaPlayer2.musicpv /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Get string:'org.mpris.MediaPlayer2.Player' string:'Metadata' | grep "xesam:title"   | sed -e 's/  */ /g ' -e 's/)//g' | cut -f4- -d ' '  ]]
+
+local get_musicpv_volume = [[ dbus-send --print-reply=literal --dest=org.mpris.MediaPlayer2.musicpv /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Get string:'org.mpris.MediaPlayer2.Player' string:'Volume'  | awk '{print $NF"|"}'  ]]
+local function musicpv_get()
+
+
+            player.hidebuton(true)
+
+
+    awful.spawn.easy_async_with_shell(get_musicpv_title, function(out)
+    local arr = gears.string.split(out,"|")
+    if arr[1] then
+	    player.trimsong(arr[1])
+    end
+
+    end)
+
+
+    awful.spawn.easy_async_with_shell(get_musicpv_volume, function(out)
+    local arr = gears.string.split(out,"|")
+    player.id = nil
+
+    if arr[1] then
+
+            player.volume = tonumber(arr[1]) *100
+            widget_volume.value = player.volume / 100
+    end
+
+    end)
+end
+local get_musicpv_state = [[ dbus-send --print-reply=literal --dest=org.mpris.MediaPlayer2.musicpv /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Get string:'org.mpris.MediaPlayer2.Player' string:'PlaybackStatus' | awk '{print $2"|"}'  ]]
+
+player.musicpv_state  = function()
+
+    awful.spawn.easy_async_with_shell(get_musicpv_state, function(out)
+
+        local arr = gears.string.split(out, '|')
+if arr[1] =="Playing" then
+
+                widget_state.text = icon_pause
+	musicpv_get()
+elseif arr[1] == "Paused" then
+
+	musicpv_get()
+                widget_state.text = icon_play
+		else
+
+            player.hidebuton(false)
+end
+
+
+    end)
+end
+
 
 player.spotify_state = function()
     awful.spawn.easy_async_with_shell(get_spotify, function(out)
@@ -203,19 +269,18 @@ player.status = function()
     elseif player.selected == 'cmus' then
         widget_spawn.text = icon_cmus
         player.cmus_state()
-
+elseif player.selected == "musicpv" then
+player.musicpv_state()
     end
 end
 
 player.init = function()
 
-        player.status()
 	function chane_player()
         local be = require('config.player')
 	player.selected =be
-	if player.selected ~= 'cmus' and player.selected ~= 'spotify' then
-player.selected  = 'spotify'
-	end
+
+        player.status()
 end
 pcall(chane_player)
 
@@ -236,7 +301,6 @@ dbus.add_match("session",
                "path='/org/mpris/MediaPlayer2',interface='org.freedesktop.DBus.Properties'")
 dbus.connect_signal("org.freedesktop.DBus.Properties", function()
     if player.wait.started then return end
-
     player.wait:start()
 
 end)
@@ -277,6 +341,10 @@ player.trimsong = function(songname)
 
     if not songname then return end
 	if string.len(songname) > 50 then songname = songname:sub(1, 50) end
+local ine = string.find(songname,'%.')
+if ine then
+songname = songname:sub(1,ine-1)
+end
 
     widget_song.text = songname
 

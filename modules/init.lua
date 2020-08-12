@@ -236,6 +236,17 @@ awful.keyboard.append_global_keybindings(
                          function(c)
                 c:activate{context = "mouse_click"}
             end),
+
+        awful.button({ modkey }, 1, function (c)
+
+				 c.floating = true
+            c:activate { context = "mouse_click", action = "mouse_move"  }
+        end),
+            awful.button({modkey}, 3,
+                         function(c)
+				 c.floating = true
+                c:activate{context = "mouse_click",action ="mouse_resize"}
+            end),
             awful.button({}, 3,
                          function(c)
 

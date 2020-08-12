@@ -1,4 +1,4 @@
-#!/bin/lua
+--#!/bin/lua
 local term = [[awesome-client  "dropdown_terminal_open('%s')"]]
 local c =  io.popen([[(echo /usr/share/pixmaps/* && (echo /usr/share/icons/hicolor/*/*/* /usr/share/app-info/icons/*/*/* |tr " " "\n"| grep "48\|36\|32\|26"))| tr " " "\n" | grep png |awk -F '/' '!seen[$NF]++' ]])
 local ico = c:lines()

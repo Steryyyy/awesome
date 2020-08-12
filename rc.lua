@@ -19,7 +19,7 @@ beautiful.init(home .. "/.config/awesome/theme.lua")
 beautiful.notification_icon_size = 60
 
 beautiful.fg_normal = '#ffffff'
-beautiful.font_name = 'Source Han Sans JP Bold '
+beautiful.font_name = 'Source Han Sans JP  Bold '
 beautiful.font = beautiful.font_name .. '  14'
 beautiful.font_icon = 'Font Awesome 5 Brands 15'
 require('modules.exit_screen')
