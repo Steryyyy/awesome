@@ -33,9 +33,10 @@ function move_and_toggle(c, t)
     if c.first_tag.index ~= t and not  (c.sticky) then
 if (not mouse.screen.tags[t].urgent) then
         c.urgent = true
-        c:move_to_tag(mouse.screen.tags[t])
 end
-    else
+
+        c:move_to_tag(mouse.screen.tags[t])
+else
         c.urgent = false
     end
 end
@@ -184,6 +185,10 @@ client.connect_signal("manage", function(c)
         return
     end
     find_class(c)
+
+if c.first_tag.index == mouse.screen.selected_tag.index then
+c:activate()
+end
 
     if next_floating then
 	    c.floating = true

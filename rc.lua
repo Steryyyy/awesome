@@ -174,7 +174,7 @@ ruled.client.connect_signal("request::rules", function()
         id = "global",
         rule = {},
         properties = {
-            focus = awful.client.focus.filter,
+            focus = false,
             raise = true,
             size_hints_honor = false,
             screen = awful.screen.preferred,
@@ -209,5 +209,4 @@ end)
 client.connect_signal("unfocus", function(c)
     c.border_color = beautiful.border_color_normal
 end)
-
 require('modules.init')
