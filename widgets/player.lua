@@ -3,14 +3,13 @@ local awful = require("my.awful")
 -- Widget and layout library
 local wibox = require("my.wibox")
 local gears = require("my.gears")
+local terminal = require('settings').terminal
 
+local beautiful = require("my.beautiful")
 local icon_play = ' '
 local icon_pause = ' '
 local icon_next = ''
 local icon_prev = ' '
-local term_command =[[
-urxvtc -name dropdown-terminal  -e cmus
-]]
 local sp_album = '/home/steryyy/.config/awesome/images/album.png'
 
 local icon_spotify = ''
@@ -36,17 +35,16 @@ local get_cmus = [[
 local song = {artist = '', song = '', cover = '', pos = 0, len = 0}
 
 local widget_state = wibox.widget.textbox(icon_pause)
-widget_state.font='Font Awesome 5 Brands 13'
+widget_state.font=beautiful.font_icon
 
 local widget_prev = wibox.widget.textbox(icon_prev)
-widget_prev.font='Font Awesome 5 Brands 13'
+widget_prev.font=beautiful.font_icon
 
 local widget_next = wibox.widget.textbox(icon_next)
-widget_next.font='Font Awesome 5 Brands 13'
+widget_next.font=beautiful.font_icon
 local widget_song = wibox.widget.textbox('', false, '#000000')
 local widget_spawn = wibox.widget.textbox(icon_spotify)
-widget_spawn.font ='Font Awesome 5 Brands 13'
-
+widget_spawn.font =beautiful.font_icon
 
 local function to_pulse(vol) return math.floor(65536 * vol / 100) end
 
@@ -89,8 +87,8 @@ player.change = function()
     player.hidebuton(false)
 
     player.status()
-    awful.spawn.with_shell('echo "return[[' .. player.selected ..
-                                    ']]" > ~/.config/awesome/config/player.lua')
+    awful.spawn.with_shell([[echo "return']] .. player.selected ..
+                                    [['" > ~/.config/awesome/config/player.lua]])
 
 end
 
@@ -150,22 +148,20 @@ player.cmus_state = function()
 
         local arr = gears.string.split(out, '|')
 
-
         if arr[1] ~= 'cmus-remote: cmus is not running' and arr[1] ~=''  then
 
-            local stat = arr[1]
-            if stat == 'playing' then
+            if arr[1] == 'playing' then
                 widget_state.text = icon_pause
             else
                 widget_state.text = icon_play
             end
-            if   not string.match( arr[2] ,'status stopped') then
-            local so = arr[2]
-            player.trimsong(so)
+            if    arr[1] ~='stopped' then
+            player.trimsong(arr[2])
 
             get_volume('C* Music Player')
             else
                 player.trimsong('')
+
         end
             player.hidebuton(true)
         else
@@ -333,7 +329,7 @@ player.spawn = function()
     if player.selected == 'spotify' then
         awful.spawn("spotify", false)
     else
-        awful.spawn.with_shell("awesome-client 'Request=true' &&  " .. term_command , false)
+        awful.spawn.with_shell("awesome-client 'Request=true' &&  " .. terminal ..' -e '..player.selected )
     end
 end
 end

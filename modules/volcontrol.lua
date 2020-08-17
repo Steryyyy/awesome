@@ -4,8 +4,10 @@ local gears = require("my.gears")
 local tshape = require('tools.shapes')
 local tcolor = require('tools.colors')
 local naughty = require("my.naughty")
+local beautiful = require("my.beautiful")
+local settings = require('settings').volume_con
 local pos = 1
-
+local maxitems = settings.items > 5  and settings.items or 5
 
 local base =
     [[ | grep -e "index\|volume: \|alsa.card_name\|mute\|device.description" | grep -v "base" |   sed -E '5~5 a|' | awk -F',' '{print $1}' | tr -d '\n'   | tr '|' '\n' |  tr -d '"' | tr -d '%'  | tr -d '/'  | sed -e 's/dB//' -e  's/index://' -e  's/muted://' -e 's/volume://' |tr -d '=' | awk   '(v=substr($0,3,1))($0=substr($0,4))(g=substr($0,index($0,$13)))(a="")(d="")(c="")(e="") (d=index($0,"device.description" )+ 20) (a=index($0,"alsa.card_name")+16) {if(d >a) {(c=substr($0,a,d-22-a)) (e=substr($0,d)) }else { (c=substr($0,a)) (e=substr($0,d,a-d-18))}  }    {print $1"|"c"|"$4"|" $6"|" e"|"v}'
@@ -58,7 +60,7 @@ local function create_page()
     return ge
 end
 
-local volume_wibox = wibox {width = 560, height = 400}
+local volume_wibox = wibox {width = settings.width or   560, height =  settings.height  or 380}
 volume_wibox.fg = '#000000'
 volume_wibox.ontop = true
 volume_wibox.visible = false
@@ -80,20 +82,13 @@ volume_pages[false] = create_page()
 
 volume_pages[true].visible = true
 
-volume_pages[false].forced_height = 350
+volume_pages[false].forced_height = settings.height or 380
 volume_pages[true].forced_height = volume_pages[false].forced_height
 local bord = wibox.widget {
-    {
-        {
             layout = wibox.layout.fixed.vertical,
             volume_pages[true],
             volume_pages[false]
 
-        },
-        margins = 5,
-        widget = wibox.container.margin
-    },
-    widget = wibox.container.background
 }
 
 volume_wibox:setup{layout = wibox.layout.fixed.vertical, tab_layout, bord}
@@ -111,9 +106,9 @@ local function update_color()
     colors[2] = tcolor.get_color(3, 'w')
     colors[3] = tcolor.get_color(4, 'w')
     -- widgets
+    volume_wibox.bg = unsel
     sel = tcolor.get_color(5, 'w')
 
-    volume_wibox.bg = unsel
     tabs[true].bg = colors[1]
     tabs[false].bg = colors[2]
     tabs[chosen_tab]:get_children_by_id('bg')[1].bg = sel
@@ -207,9 +202,9 @@ local function update(tru, t)
     if pos >= ce then
         pos = ce
         end
- local shift =ce < 5 and 0 or (ce-pos < math.ceil(5/2) and ce - 5)  or (pos > math.ceil(5/2) and pos -math.ceil(5/2)) or 0
+ local shift =ce < maxitems and 0 or (ce-pos < math.ceil(maxitems/2) and ce - maxitems)  or (pos > math.ceil(maxitems/2) and pos -math.ceil(maxitems/2)) or 0
  if  tru then shift =  shift -2  end
- local seel = ce < 5 and pos or ( ce-pos < math.ceil(5/2) and 5-(ce-pos)) or pos < math.ceil(5/2) and pos or math.ceil(5/2)
+ local seel = ce < maxitems and pos or ( ce-pos < math.ceil(maxitems/2) and maxitems-(ce-pos)) or pos < math.ceil(maxitems/2) and pos or math.ceil(maxitems/2)
 
     local function update_one(i, a)
         if i == seel then
@@ -394,7 +389,7 @@ id ='type_bg',
                         },
                         bg = colors[2],
                         id = 'name_bg',
-                        forced_width = volume_wibox.width - 90,
+                        forced_width = volume_wibox.width - 80,
                         widget = wibox.container.background
 
                     },
@@ -403,8 +398,8 @@ id ='type_bg',
                             {
                                 {
                                     id = 'volume_text',
-                                    forced_width = 15,
-                                    font = 'Font Awesome 5 Free Solid  10',
+                                    forced_width = 20,
+                                    font = beautiful.font_icon,
                                     text = icon,
 
                                     widget = wibox.widget.textbox
@@ -522,7 +517,7 @@ local function get_clients()
 
             for i, a in pairs(clients) do
                 local a = widgets_create(a)
-                if i >5 then
+                if i >maxitems then
                     break
                 end
                 volume_pages[false]:add(a)
@@ -560,7 +555,7 @@ local function get_cards()
 
             for i, ab in pairs(cards) do
                 local a = widgets_create(ab)
-                if i >3 then
+                if i >maxitems-2 then
                     break
                 end
 

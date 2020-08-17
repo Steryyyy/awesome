@@ -13,10 +13,10 @@ end
 local e = setmetatable({}, {__mode = 'k'})
 function a.get()
     if #e > 0 then
-        return e[1]
+        return e
     else
-        local f = b.client.get()
-        for c, g in pairs(f) do if g.urgent then return g end end
+	    return {}
+
     end
 end
 function a.jumpto(h)

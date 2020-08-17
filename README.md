@@ -1,43 +1,8 @@
 
 
-<img src="https://github.com/Steryyyy/awesome/blob/master/screenshots/alll.jpg" width="50%">
+<img src="https://github.com/Steryyyy/awesome/blob/master/screenshots/alll.jpg" width="75%">
 
 
-<!-- vim-markdown-toc GFM -->
-
-* [Dependencies](#dependencies)
-	* [Required](#required)
-	* [Optional](#optional)
-* [Customization](#customization)
-	* [Changing corona virus tracker](#changing-corona-virus-tracker)
-	* [Changind / adding colors](#changind--adding-colors)
-	* [Wallpaper module](#wallpaper-module)
-	* [Start menu](#start-menu)
-	* [Profile picture](#profile-picture)
-	* [Change terminal](#change-terminal)
-	* [Change clients tags](#change-clients-tags)
-	* [Change password](#change-password)
-	* [Farther customisation](#farther-customisation)
-* [Key bindings](#key-bindings)
-	* [Default mode](#default-mode)
-		* [Volume and player](#volume-and-player)
-		* [Switching to modules](#switching-to-modules)
-		* [Notification](#notification)
-		* [Screen keybindings](#screen-keybindings)
-		* [Tag keybindings](#tag-keybindings)
-		* [Client keybindings](#client-keybindings)
-	* [Module keybindings](#module-keybindings)
-		* [Startmenu module](#startmenu-module)
-		* [Volume module](#volume-module)
-		* [Wallpaper module](#wallpaper-module-1)
-		* [Notification module](#notification-module)
-		* [Exitmenu module](#exitmenu-module)
-	* [Mouse binding](#mouse-binding)
-		* [Default](#default)
-		* [Exitmenu module](#exitmenu-module-1)
-* [Gallery](#gallery)
-
-<!-- vim-markdown-toc -->
 
 
 # Dependencies
@@ -75,8 +40,8 @@
 Go to [https://github.com/sagarkarira/coronavirus-tracker-cli](https://github.com/sagarkarira/coronavirus-tracker-cli)
 to find your country name and code
 
-Go to ~/.config/awesome/rc.lua
-and edit country_name and ISO_3166_1 to your country code
+Go to ~/.config/awesome/settings.lua
+and edit country_name and country code
 
 
 ## Changind / adding colors
@@ -139,8 +104,8 @@ Example
     ├── 8.jpg
     └── 9.jpg
 
-Go to ~/.config/awesome/modules/wallpaper.lua
-And change wallpaper_width to your monitor resolution
+Go to ~/.config/awesome/settings.lua
+And change wallpaper_width to your wallpaper resolution
 ```
 ## Start menu
 Simply run
@@ -153,13 +118,10 @@ It should find desktop files from /usr/share/applications/
 
 add profile.jpg to ~/.config/awesome/images/
 ## Change terminal
-Go to ~/.config/awesome/tools/connect.lua
+Go to ~/.config/awesome/settings.lua
 
-And change term_command
+And change terminal
 
-Go to ~/.config/awesome/widgets/player.lua
-
-And change term_command
 
 ## Change clients tags
 Go to ~/.config/awesome/tools/connect.lua

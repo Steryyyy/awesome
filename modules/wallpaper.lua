@@ -3,35 +3,34 @@ local tcolor = require('tools.colors')
 local tshape = require('tools.shapes')
 local wibox = require("my.wibox")
 local gears = require("my.gears")
+local settings = require('settings').wallpaper
+local naughty = require('my.naughty')
 local home = os.getenv('HOME')
 local pos = 1
 local max = 0
 local wallpaper_dir = home .. '/wallpaper/'
 local thumbnail_dir = home .. '/.config/awesome/images/thumbnail/'
 local wallpapers = {}
-local items = 9
-local middle = math.ceil(9 / 2)
-local default_timeout = 60 * 5
+local item_num = settings.items  or 9
+local items = item_num
+local middle = math.ceil(item_num / 2)
 local clock_timeout = 1
-local s = mouse.screen
 local state = false
 local clock = 0
-local timeout = default_timeout
+local timeout = settings.default_timeout
 local chosen_dir = 1
 local chosen_file = 1
-local naughty = require('my.naughty')
 local item_active = '#ff0000'
 local sel_box = 1
-local wallpaper_width = 2560
 
-mins = string.format("%02.f", math.floor(default_timeout / 60));
-secs = string.format("%02.f", math.floor(default_timeout - mins * 60));
+mins = string.format("%02.f", math.floor(settings.default_timeout / 60));
+secs = string.format("%02.f", math.floor(settings.default_timeout - mins * 60));
 local default_time_text = mins .. ':' .. secs
 local sel_dir = 0
 
 local wallpaper_layout = wibox.layout.fixed.horizontal()
 local wallpapers_wibox = wibox {
-    width = wallpaper_width,
+    width = settings.wallpaper_width,
     height = 145,
     fg = '#000000',
     ontop = true,
@@ -212,9 +211,9 @@ end
 
 local function update_timer()
     get_time(timeout - clock)
-    clock_widget.value = (timeout - clock) / default_timeout
+    clock_widget.value = (timeout - clock) / settings.default_timeout
     if timeout - clock <= 0 then
-        timeout = default_timeout
+        timeout = settings.default_timeout
         clock = 0
         random_wallpaper()
     end
@@ -275,7 +274,7 @@ function public.hide()
 
 end
 function public.show()
-    items = math.floor(mouse.screen.geometry.width / (wallpaper_width / 9))
+    items = math.floor(mouse.screen.geometry.width / (settings.wallpaper_width / item_num))
     middle = math.ceil(items / 2)
     wallpapers_wibox.visible = true
     wallpapers_wibox.y = 0
@@ -296,7 +295,7 @@ function public.show()
             find_dir(1)
         elseif key == 'r' then
             public.stop()
-            timeout = default_timeout
+            timeout = settings.default_timeout
             clock = 0
             public.start()
         elseif key == 's' then
@@ -347,13 +346,16 @@ wallpaper_layout:get_children()[sel_box].bg = item_active
 end)
 awesome.connect_signal('exit', function()
     local e = timeout - clock
-    if e <= 0 then e = default_timeout end
+    local stat = 'false'
+    if e <= 0 then e = settings.default_timeout end
+if state then
+stat = 'true'
+end
     if not chosen_dir then chosen_dir = 1 end
-    awful.spawn.easy_async_with_shell('echo   "return {' .. e .. ',' ..
+    awful.spawn.with_shell('echo   "return{' .. e .. ',' ..
                                           chosen_file .. ',' .. chosen_dir ..
-                                          ',' .. tostring(state) ..
-                                          '}"  > /home/steryyy/.config/awesome/config/wallpaper.lua',
-                                      function(out) end)
+                                          ',' .. stat ..
+                                          '}"  > ~/.config/awesome/config/wallpaper.lua')
 end)
 local he = {}
 local dir = {}
@@ -387,7 +389,7 @@ end
 if #wallpapers >0 then
 gears.timer.start_new(0.2, function()
 
-    for i = 1, 9 do
+    for i = 1, item_num do
 
         local im = wibox.widget {
             {
@@ -402,7 +404,7 @@ gears.timer.start_new(0.2, function()
             widget = wibox.container.background
         }
 
-        im.forced_width = wallpaper_width / 9
+        im.forced_width = settings.wallpaper_width / item_num
 
         wallpaper_layout:add(im)
     end
@@ -424,14 +426,14 @@ if t > 0 then
 
 else
 
-    timeout = default_timeout
+    timeout = settings.default_timeout
 
 end
 
 get_time(timeout - clock)
-clock_widget.value = t / default_timeout
+clock_widget.value = t / settings.default_timeout
 
-if s == true then
+if state == true then
     clock_widget.color = tcolor.get_color(5, 'w')
 
     public.start()

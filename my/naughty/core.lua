@@ -7,7 +7,7 @@ local gsurface = require("my.gears.surface")
 
 local naughty = {}
 
-gtable.crush(naughty, require("my.naughty.constants"))
+-- gtable.crush(naughty, require("my.naughty.constants"))
 
 local properties = {
     suspended = false,
@@ -32,14 +32,6 @@ screen.connect_for_each_screen(function(s)
         middle = {}
     }
 end)
-
-
-
-
-
-
-
-
 local conns = gobject._setup_class_signals(naughty, {
     allow_chain_of_responsibility = true
 })
@@ -161,7 +153,7 @@ end
 local nnotif = nil
 
 function naughty.notify(args)
- 
+
     nnotif = nnotif or require("my.naughty.notification")
 
     local n =

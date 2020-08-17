@@ -1,10 +1,7 @@
 local awful = require("my.awful")
-
 local player = require('widgets.player')
 local net = require('widgets.net')
-
 local menu = require('modules.startmenu')
-
 local terminal_toggle = require('tools.connect')
 local battery = require('widgets.battery')
 
@@ -193,7 +190,12 @@ if c.fullscreen then return end
     end
 
 
-    c:relative_move(x, y, w, h)
+    local g = c.screen.workarea
+    c.width = c.width + w  < g.width-50 and c.width +w or g.width - 50
+c.height = c.height +h < g.height - 50 and c.height + h or g.height - 50
+c.x = (c.x +x + c.width > g.width-50 +g.x +20 and g.x +20) or (c.x +x < g.x+20 and g.x+20) or c.x +x
+
+c.y = (c.y +y + c.height > g.height-50 +g.y +20 and g.y +20) or (c.y +y < g.y+20 and g.y+20) or c.y +y
 
 end
 awful.keyboard.append_global_keybindings(

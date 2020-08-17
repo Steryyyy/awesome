@@ -437,20 +437,6 @@ i.client.connect_signal("property::screen", function(a8)
         end
     end)
 end)
-local function aN(r, aO)
-    local aP = tag.getproperty(r, "urgent_count") or 0;
-    aP = aP + aO >= 0 and aP + aO or 0;
-    tag.setproperty(r, "urgent", aP > 0)
-    tag.setproperty(r, "urgent_count", aP)
-end
-local function aQ(a8, r) if a8.urgent then aN(r, 1) end end
-
-local function aS(a8)
-    for q, r in ipairs(a8:tags()) do aN(r, a8.urgent and 1 or -1) end
-end
-i.client.connect_signal("property::urgent", aS)
-
-i.client.connect_signal("tagged", aQ)
 i.tag.connect_signal("request::select", tag.object.view_only)
 
 f.delayed_call(function()

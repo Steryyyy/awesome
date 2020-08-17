@@ -1,7 +1,5 @@
 local beautiful = require("my.beautiful")
 local chosencol = 1
-
-
 local public = {}
 local color_array  =
 {{

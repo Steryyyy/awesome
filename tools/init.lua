@@ -1,5 +1,2 @@
-return  {
-   connect = require('tools.connect'),
-   shapes = require('tools.shapes'),
-    color = require('tools.colors')
-}
+return{--connect=require('tools.connect'),
+shapes=require('tools.shapes'),color=require('tools.colors')}

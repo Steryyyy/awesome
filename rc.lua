@@ -11,18 +11,17 @@ local naughty = require("my.naughty")
 
 local ruled = require("my.ruled")
 local home = os.getenv('HOME')
-local country_name = "Poland"
+local settings = require('settings').rc
 
--- country code   https://en.wikipedia.org/wiki/ISO_3166-1
-local ISO_3166_1 = "pl"
 beautiful.init(home .. "/.config/awesome/theme.lua")
 beautiful.notification_icon_size = 60
 
 beautiful.fg_normal = '#ffffff'
-beautiful.font_name = 'Source Han Sans JP  Bold '
-beautiful.font = beautiful.font_name .. '  14'
-beautiful.font_icon = 'Font Awesome 5 Brands 15'
-require('modules.exit_screen')
+beautiful.font_name = settings.font
+beautiful.font = beautiful.font_name .. ' Bold '.. settings.font_size
+beautiful.font_icon_name = settings.font_icon
+beautiful.font_icon = settings.font_icon .. settings.font_icon_size
+local show_exit =  require('modules.exit_screen')
 local tools = require('tools')
 local widgets = require("widgets")
 
@@ -67,15 +66,15 @@ clock.forced_width = 125
 
 local microphone = Power(widgets.volume.microphone, gears.shape.powerline, 'tg')
 local coron = Power(wibox.widget {
-    font = beautiful.font_name .. ' 10',
+    font = beautiful.font_name .. ' Bold 10',
 
     widget = wibox.widget.textbox
 }, tools.shapes.taskendleft)
 coron.forced_width = 240
 awful.spawn.easy_async_with_shell([[
-	[ "$(stat -c %y ~/.cache/corona| cut -d ' ' -f1)" = "$(date '+%Y-%m-%d')" ] || curl https://corona-stats.online/]]..ISO_3166_1  .. [[ | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" > ~/.cache/corona ;
+	[ "$(stat -c %y ~/.cache/corona| cut -d ' ' -f1)" = "$(date '+%Y-%m-%d')" ] || curl https://corona-stats.online/]]..settings.country_code  .. [[ | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" > ~/.cache/corona ;
 
-	grep  "]].. country_name.. [[" ~/.cache/corona | sed 's/\s*//g'| sed 's/║/ /g' | sed 's/│/:/g' | awk -F':' '{if ($6~"▲"){}else {$6="0▲"}  }{if($4~"▲"){}else {$4="0▲"}}{print $3"|"$4"|"$9"⚠|"$5 "☠|"$6  }'
+	grep  "]].. settings.country_name.. [[" ~/.cache/corona | sed 's/\s*//g'| sed 's/║/ /g' | sed 's/│/:/g' | awk -F':' '{if ($6~"▲"){}else {$6="0▲"}  }{if($4~"▲"){}else {$4="0▲"}}{print $3"|"$4"|"$9"⚠|"$5 "☠|"$6  }'
 
 	]], function(out) coron:get_children()[1]:get_children()[1].text = out end)
 local wwi = wibox.widget {
@@ -207,6 +206,6 @@ client.connect_signal("focus", function(c)
 
 end)
 client.connect_signal("unfocus", function(c)
-    c.border_color = beautiful.border_color_normal
+    c.border_color = '#000000'
 end)
 require('modules.init')

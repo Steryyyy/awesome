@@ -1,16 +1,10 @@
-
-
 local naughty = require("my.naughty.core")
 local awful = require("my.awful")
-
-
 local beautiful = require("my.beautiful")
-
 local wibox = require("my.wibox")
-
 local timer = require("my.gears.timer")
-
 local tcolor = require('tools.colors')
+local settings = require('settings').noti
 local lay = wibox.layout.fixed.vertical()
 local no = wibox.widget.textbox('')
 local suspend = false
@@ -22,9 +16,9 @@ lay:add(menus)
 no.forced_height = 20
 lay:add(no)
 local list = wibox {
-    x = mouse.screen.geometry.width - 400,
-    width = 400,
-    height = 300,
+    x = mouse.screen.geometry.width - settings.width,
+    width = settings.width,
+    height = settings.height,
     ontop = true,
     fg = '#000000'
 
@@ -33,10 +27,16 @@ local last_not = wibox {width = 600, height = 100, ontop = true, fg = '#000000'}
 local function color_update()
 
     last_not.bg = tcolor.get_color(2, 'w')
+
     list.bg = tcolor.get_color(1, 'w')
     menus.bg = tcolor.get_color(1, 'w')
     menus.item_active_color = tcolor.get_color(5, 'w')
 menus.item_unselect_color = tcolor.get_color(3, 'w')
+for _, c in pairs(menus:get_children()) do
+c.bg = tcolor.get_color(3, 'w')
+c:get_children()[1]:get_children()[1].bg = tcolor.get_color(2,'w')
+
+end
 end
 
 color_update()
@@ -100,7 +100,7 @@ local iconbox = wibox.widget.textbox(tostring(textic))
     if app then
         top:add(wibox.widget {
             markup = app,
-            font = 'SF Pro Text Bold 12',
+            font = beautiful.font,
             align = 'left',
             valign = 'center',
             widget = wibox.widget.textbox
@@ -131,7 +131,7 @@ local iconbox = wibox.widget.textbox(tostring(textic))
 
                     wibox.widget {
                         markup = app,
-                        font = 'SF Pro Text Bold 12',
+                        font = beautiful.font,
                         align = 'left',
                         valign = 'center',
 			forced_width = list.width - 100,
@@ -139,7 +139,7 @@ local iconbox = wibox.widget.textbox(tostring(textic))
                     },
 		    wibox.widget{
 			    id= 'time',
-      			font = 'SF Pro Text Bold 12',
+      			font =beautiful.font,
                         align = 'left',
                         valign = 'center',
                         widget = wibox.widget.textbox
@@ -150,14 +150,14 @@ local iconbox = wibox.widget.textbox(tostring(textic))
                 {
                     wibox.widget {
                         markup = title,
-                        font = 'SF Pro Text Bold 12',
+                        font = beautiful.font,
                         align = 'left',
                         valign = 'center',
                         widget = wibox.widget.textbox
                     },
                     wibox.widget {
                         markup = text,
-                        font = 'SF Pro Text Regular 11',
+                        font = beautiful.font,
                         align = 'left',
                         valign = 'center',
                         widget = wibox.widget.textbox
@@ -179,7 +179,7 @@ local iconbox = wibox.widget.textbox(tostring(textic))
 notifbox_template.time = os.time()
     local w, h = wibox.widget.base.fit_widget(notifbox_template,
                                               {dpi = mouse.screen.dpi},
-                                              notifbox_template, 800, 200)
+                                              notifbox_template, settings.max_size or 800, settings.min_size or 200)
 last_not.height = h
 last_not.width = w
 
@@ -234,7 +234,7 @@ end
 function public.start()
     list.visible = true
 
-    list.x = mouse.screen.geometry.width - 400 + mouse.screen.geometry.x
+    list.x = mouse.screen.geometry.width - settings.width + mouse.screen.geometry.x
     local time = os.time()
 
 for i,a in pairs(menus:get_children())do
@@ -250,7 +250,6 @@ end
 
         if key == 't' then
             suspend = not suspend
-
             no.text = not suspend and '' or ''
 
         elseif key == ' ' or key == 'Return' then

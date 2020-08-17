@@ -6,6 +6,7 @@ local gears = require("my.gears")
 local awful = require("my.awful")
 local naughty = require("my.naughty")
 
+local beautiful = require("my.beautiful")
 local battery = {}
 
 battery.colors = {'#8B4513'}
@@ -26,7 +27,7 @@ proc.value = 1
 
 local battery_icon = wibox.widget.textbox('')
 
-battery_icon.font = 'Font Awesome 5 Free Solid Bold 15'
+battery_icon.font = beautiful.font_icon
 local widget = wibox.widget {
     {
 
@@ -97,7 +98,7 @@ end
 
 
 gears.timer {
-    timeout   = 300,
+    timeout   = 120,
     autostart = true,
     callback  = update
 }

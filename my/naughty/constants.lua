@@ -1,13 +1,3 @@
-----------------------------------------------------------------------------
---- This file hosts the shared constants used by the notification subsystem.
---
--- [[documented in core.lua]]
---
--- @author koniu &lt;gkusnierz@gmail.com&gt;
--- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
--- @copyright 2008 koniu
--- @copyright 2017 Emmanuel Lepage Vallee
-----------------------------------------------------------------------------
 local beautiful = require("my.beautiful")
 local dpi = beautiful.xresources.apply_dpi
 
@@ -89,7 +79,6 @@ ret.notification_closed_reason = {
     undefined            = 4
 }
 
--- Legacy --TODO v5 remove this alias
 ret.notificationClosedReason = ret.notification_closed_reason
 
 return ret

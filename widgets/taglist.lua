@@ -1,20 +1,17 @@
 local wibox = require("my.wibox")
 local gears = require("my.gears")
 local tcolor = require('tools.colors')
-
-
+local awful = require('my.awful').client
+local beautiful = require('my.beautiful')
 local widget = wibox.layout.flex.horizontal()
 widget.spacing = -12
 
 local function taglistcolor(self, index)
 
-
     self.bg = tcolor.get_color(index + 1, 'tg')
-
-
 local g = false
     for s in screen do
-       
+
         if s.tags[index].selected  then
 if s == mouse.screen then
             self.bg = tcolor.get_color(1, 'tgs')
@@ -24,11 +21,16 @@ if s == mouse.screen then
     self.bg = tcolor.get_color(2, 'tgs')
 
 end
-elseif not g and   s.tags[index].urgent then
-        self.bg = tcolor.get_color(3, 'tgs')
 
         end
     end
+
+for _,c in pairs(awful.urgent.get())do
+if c.first_tag.index == index then
+self.bg = tcolor.get_color(3,'tgs')
+awful.urgent.delete(c)
+end
+end
 end
 
 local function update()
@@ -54,7 +56,7 @@ local function draw()
                     {
                         id = 'text_role',
                         text = a.name,
-			font ='mononoki Nerd Font 13',
+			font =beautiful.font_icon,
                         widget = wibox.widget.textbox
                     },
 

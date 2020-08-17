@@ -3,7 +3,7 @@ local gobject = require("my.gears.object")
 local gtable = require("my.gears.table")
 
 local gfs = require("my.gears.filesystem")
-local cst = require("my.naughty.constants")
+-- local cst = require("my.naughty.constants")
 local naughty = require("my.naughty.core")
 
 local pcommon = require("my.awful.permissions._common")
@@ -18,13 +18,7 @@ function notification:reset_timeout(new_timeout)
 
     if self.timer and not self.timer.started then self.timer:start() end
 end
-
-
-
-
-
-
-
+--[[
 local properties = {
     "message", "title", "timeout", "hover_timeout", "app_name", "position",
     "ontop", "border_width", "width", "font", "icon", "icon_size", "fg", "bg",
@@ -33,7 +27,9 @@ local properties = {
     "auto_reset_timeout", "urgency", "image", "images", "widget_template",
     "max_width"
 }
+--]]
 
+--[[
 for _, prop in ipairs(properties) do
     notification["get_" .. prop] = notification["get_" .. prop] or
                                        function(self)
@@ -57,6 +53,7 @@ for _, prop in ipairs(properties) do
 
 end
 
+--]]
 for _, prop in ipairs {"image", "images"} do
     local cur = notification["set_" .. prop]
 
@@ -127,10 +124,12 @@ end
 
 
 local function create(args)
+    --[[
     if cst.config.notify_callback then
         args = cst.config.notify_callback(args)
         if not args then return end
     end
+    --]]
 
     assert(not args.id, "Identifiers cannot be specified externally")
 
@@ -140,7 +139,7 @@ local function create(args)
     local n = gobject {enable_properties = true}
 
     if args.text then
-    
+
         args.message = args.text
     end
 
@@ -160,7 +159,6 @@ local function create(args)
 
     gtable.crush(n, notification, true)
 
-  
 
     n.id = n.id or notification._gen_next_id()
 
@@ -171,13 +169,12 @@ local function create(args)
     end
 
     if (not n.ignore) and ((not n.preset) or n.preset.ignore ~= true) then
-   
         naughty.emit_signal("request::display", args)
     end
 
     if n._private.timeout then
         n:set_timeout(n._private.timeout or (n.preset and n.preset.timeout) or
-                          cst.config.timeout)
+                          2)
     end
 
     return n

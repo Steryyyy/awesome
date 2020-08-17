@@ -14,7 +14,7 @@ local tcat = table.concat
 local tins = table.insert
 local unpack = unpack or table.unpack
 local naughty = require("my.naughty.core")
-local cst = require("my.naughty.constants")
+-- local cst = require("my.naughty.constants")
 local nnotif = require("my.naughty.notification")
 
 local capabilities = {
@@ -27,7 +27,7 @@ local bus_connection
 
 local urgency = {low = "\0", normal = "\1", critical = "\2"}
 
-dbus.config.mapping = cst.config.mapping
+-- dbus.config.mapping = cst.config.mapping
 
 
 
@@ -96,7 +96,14 @@ function notif_methods.Notify(sender, object_path, interface, method,
         args.app_name = appname
     end
 
-    local preset = args.preset or cst.config.defaults
+    local preset = args.preset or  {
+    padding         = 4,
+    spacing         = 1,
+    icon_dirs       = { "/usr/share/pixmaps/", "/usr/share/icons/hicolor" },
+    icon_formats    = { "png", "gif" },
+    notify_callback = nil,
+}
+
     local notification
 
     local legacy_data = {
@@ -176,10 +183,12 @@ function notif_methods.Notify(sender, object_path, interface, method,
 end
 
 function notif_methods.CloseNotification(_, _, _, _, parameters, invocation)
+    --[[
     local obj = naughty.get_by_id(parameters.value[1])
     if obj then
         obj:destroy(cst.notification_closed_reason.dismissed_by_command)
     end
+    --]]
     invocation:return_value(GLib.Variant("()"))
 end
 
@@ -214,7 +223,7 @@ local function on_bus_acquire(conn, _)
         name = "org.freedesktop.Notifications",
         methods = {
             method {name = "GetCapabilities", out_args = {arg("caps", "as")}},
-            method {name = "CloseNotification", in_args = {arg("id", "u")}},
+            -- method {name = "CloseNotification", in_args = {arg("id", "u")}},
             method {
                 name = "GetServerInformation",
                 out_args = {

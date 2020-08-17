@@ -114,7 +114,7 @@ local force_ignore = {
     width = true,
     height = true,
     geometry = true,
- 
+
     border_width = true,
     floating = true,
     size_hints_honor = false
@@ -234,7 +234,7 @@ crules._execute = function(_, c, props, callbacks)
                              props.border_width(c, props) or props.border_width
     end
 
-  
+
 
     if props.size_hints_honor ~= nil then
         c.size_hints_honor = type(props.size_hints_honor) == "function" and
@@ -344,7 +344,7 @@ return setmetatable(module, {
     end,
     __index = function(_, k)
         if k == "rules" then
-         
+
 
             if not crules._matching_rules["my.awful.rules"] then
                 crules:add_matching_rules("my.awful.rules", {}, {}, {})

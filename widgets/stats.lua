@@ -1,6 +1,8 @@
 local a = require("my.wibox")
 local b = require("my.awful")
 local c = require("my.gears")
+
+local beautiful = require("my.beautiful")
 local d = {precentage = a.widget.textbox('')}
 local cpu_pr = a.widget.textbox('')
 
@@ -50,13 +52,13 @@ end
 d.timer = c.timer {
 	call_now = true,
 	autostart = true,
-    timeout = 5,
-    callback = function() d.update() end
+    timeout = 6,
+    callback = function() pcall(d.update) end
 }
 
 cpu_pr.forced_width = 50
 mem_pr.forced_width = cpu_pr.forced_width
-d.cpu = a.widget {a.widget{text =' ',font ='Font Awesome 5 Brands 13' , widget = a.widget.textbox} , cpu_pr, layout = a.layout.fixed.horizontal}
-d.mem =a.widget {a.widget{text =' ',font ='Font Awesome 5 Free Solid Bold' , widget = a.widget.textbox} , mem_pr, layout = a.layout.fixed.horizontal}
+d.cpu = a.widget {a.widget{text =' ',font =beautiful.font_icon , widget = a.widget.textbox} , cpu_pr, layout = a.layout.fixed.horizontal}
+d.mem =a.widget {a.widget{text =' ',font =beautiful.font_icon , widget = a.widget.textbox} , mem_pr, layout = a.layout.fixed.horizontal}
 
 return d

@@ -1,10 +1,7 @@
 local awful = require("my.awful")
 
-local beautiful = require("my.beautiful")
 local gears = require("my.gears")
-local term_command = [[
-urxvtc -name dropdown-terminal %s
-]]
+local term_com = require('settings').terminal
 local fullhight = false
 
 local terminals = {}
@@ -33,11 +30,13 @@ function move_and_toggle(c, t)
     if c.first_tag.index ~= t and not  (c.sticky) then
 if (not mouse.screen.tags[t].urgent) then
         c.urgent = true
+	awful.client.urgent.add(c,"urgent")
 end
 
         c:move_to_tag(mouse.screen.tags[t])
 else
         c.urgent = false
+	awful.client.urgent.delete(c)
     end
 end
 
@@ -97,7 +96,7 @@ local function manage(c)
         table.insert(terminals, c)
         c.keys = gears.table.join(awful.key({'Mod4'}, "Return", function()
             Request = true
-            awful.spawn.with_shell(string.format(term_command, "", ""))
+            awful.spawn.with_shell(term_com)
         end), awful.key({'Mod4'}, "f", function()
 
 	fullhight = not fullhight
@@ -132,7 +131,6 @@ local function manage(c)
             dele = true
             c:kill()
         end))
-
         c.sticky = true
         c.border_width = 0
         c.hidden = true
@@ -154,7 +152,7 @@ local function manage(c)
         c.width = c.screen.geometry.width
         c.height = c.screen.geometry.height / 2
 
-        move_and_toggle(c, 6,true)
+        move_and_toggle(c, 6)
 
         if Request or c.instance == 'dropdown-terminalr' then
             c.instance = 'dropdown-termil'
@@ -179,8 +177,6 @@ client.connect_signal("manage", function(c)
 
     if c.class == '' or c.class == nil then
         move_and_toggle(c, 6)
-        c.border_width = 3
-        c.border_color = beautiful.border_normal
         c:connect_signal('property::class', function(c) find_class(c) end)
         return
     end
@@ -200,16 +196,12 @@ c:relative_move(0,0,0,0)
     end
 end)
 
-client.connect_signal("focus", function(c)
-    c.border_color = beautiful.border_color_active
-end)
-client.connect_signal("unfocus", function(c) c.border_color = '#000000' end)
 
 local function toggle()
 
     if #terminals == 0 then
         Request = true
-        awful.spawn.with_shell(string.format(term_command, "", ""))
+        awful.spawn.with_shell(term_com)
         return
     end
 

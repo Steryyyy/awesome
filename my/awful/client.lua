@@ -119,12 +119,11 @@ end
 
 function client.object.relative_move(self, I, J, K, L)
     local M = self:geometry()
-    local g = self.screen.workarea
 
-    M['width'] = M['width'] + K < g.width -50 and   M['width'] + K or  g.width -50;
-    M['height'] = M['height'] + L < g.height - 50 and  M['height'] + L or  g.height - 50 ;
-      M['x'] = (M['x'] +I  +   M['width'] > g.width -50 + g.x  +20 and g.x +20) or   (M['x'] +I < g.x+20 and g.x +20) or M['x'] +I
-      M['y'] = (M['y'] +J  +   M['height'] > g.height -50 + g.y +20  and g.y +20) or   (M['y'] +J < g.y+20 and g.y +20) or M['y'] +J
+    M['width'] = M['width'] + K ;
+    M['height'] = M['height'] + L  ;
+      M['x'] =   M['x'] +I
+      M['y'] =  M['y'] +J
     self:geometry(M)
 end
 

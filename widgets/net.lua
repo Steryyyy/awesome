@@ -2,11 +2,11 @@ local wibox = require("my.wibox")
 local gears = require("my.gears")
 
 local awful = require("my.awful")
-
+local beautiful = require('my.beautiful')
 local naughty = require("my.naughty")
 
 local widget = wibox.widget.textbox("睊")
-
+widget.font = beautiful.font_icon
 
 local interface = "enp9s0"
 local msg = "Wired network is disconnected"

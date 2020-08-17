@@ -1,17 +1,4 @@
----------------------------------------------------------------------------
---- AWesome Functions very UsefuL
---
--- @author Julien Danjou &lt;julien@danjou.info&gt;
--- @copyright 2008 Julien Danjou
--- @module awful
----------------------------------------------------------------------------
-
-
-
 require("my.awful.root")
-
-
-
 local ret = {
     client = require("my.awful.client");
 
@@ -31,12 +18,8 @@ local ret = {
 
    permissions = require("my.awful.permissions");
 
-    rules = require("my.awful.rules");
+    -- rules = require("my.awful.rules");
 
     spawn = require("my.awful.spawn");
 }
-
-
 return ret
-
-
