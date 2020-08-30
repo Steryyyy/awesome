@@ -5,6 +5,7 @@ local tshape = require('tools.shapes')
 
 local beautiful = require("my.beautiful")
 local tcolor = require('tools.colors')
+local settings = require('settings').exit_screen
 
 local password = 'awesomeWm'
 local icon_font = beautiful.font_icon_name ..'50'
@@ -37,7 +38,7 @@ local function bgg(w, shape)
 end
 local username = os.getenv("USER") or 'Anon'
 local username_widget = wibox.widget.textbox(username)
-username_widget.font = beautiful.font_name ..' 30'
+username_widget.font = beautiful.font_name ..' 50'
 username_widget.forced_width = 600
 local usericon = os.getenv('HOME')..'/.config/awesome/images/profile.jpg'
 local usericon_widget =wibox.widget.imagebox  (usericon)
@@ -72,7 +73,7 @@ local goodbye_widget = wibox.widget {
 
 }
 goodbye_widget:set_spacing(-125)
-prompt.font = beautiful.font_name ..' 50'
+prompt.font = beautiful.font_name ..' 40'
 
 local comm = {}
 
@@ -87,7 +88,7 @@ table.insert(comm, bgg(exit_text_icon))
 table.insert(comm, bgg(lock_text_icon, tshape.taskendleft))
 
 local index = #comm
-local timeout = 5
+local timeout = 3
 
 local s = 0
 local locked = false
@@ -170,8 +171,9 @@ end
 local function rotate(i) change(index + i) end
 for _,a in pairs(exit_screens) do
 
-	a:buttons(gears.table.join(
-	awful.button({}, 1, function()
+	a:connect_signal("button::press",function(_,_,_,b)
+		if b == 1 then
+
 		if index == #comm then
 			locked = true
 			prompt.text = 'Password:'
@@ -180,14 +182,16 @@ for _,a in pairs(exit_screens) do
 		else
 			clock:start()
 		end
-	end),
-	awful.button({}, 2, function()  exit_screen_hide() end),
+	elseif b ==3 then
 
-	awful.button({}, 4, function()  rotate(1) end),
+exit_screen_hide()
+	else
 
-	awful.button({}, 5, function()  rotate(-1) end),
-	awful.button({},3,function()  exit_screen_hide() end)
-	))
+rotate( b ==4 and 1 or -1)
+	end
+	end)
+
+
 
 end
 local sett = wibox.widget {
@@ -245,11 +249,11 @@ local dictionary = {
 	" ugwy bastawd ",
 	" mowon ",
 	" u awe thief ",
-	" did u miss spewwed? ",
+	" diws yyou mwisws speawwewd  ? ",
 	" moshi moshi keisatsu desu ka? ",
 	" this iz nyot seewch enginye ",
 	" wat iz dat ? wat awe u wwiting? ",
-	" dude dat iz not windows. ",
+	"Sempai i wwewyy sowwyy twhat iws wnot wiwndowws (◕︿◕✿) ",
 	"(╯°□°）╯︵ ┻━┻",
 	"\\_(ツ)_/¯",
 	"OwO Wat iz dis?? Wat awe you wwiting?",
@@ -257,7 +261,7 @@ local dictionary = {
 	"A most nyotabwe cowawd, an infinyite an endwess wiaw, an houwwy pwomise bweekew, te ownyew of nyo onye good kwawity.",
 	"away, u stawvewwing, u ewf-skin, u dwied nyeet's-tongue, buww's-pizzwe, u stock-fish (・`ω´・) ",
 	"away, u thwee-inch foow (・`ω´・)  ",
-	"come, come, u fwowawd an unyabwe wowms (・`ω´・) ",
+	"come, come, u fwowawd an unyabwe wowms \n(・`ω´・) ",
 	"go, pwick thy face, an uvw-wed thy feew, thou wiwy-wivew’d boy.",
 	"his wit's as thick as a tewkesbuwy mustawd.",
 	"i am pigeon-wivew'd an wack gaww.",
@@ -299,12 +303,25 @@ local dictionary = {
 	"wouwd thou wouwdst buwst (・`ω´・) ",
 	"you poow, base, wascawwy, cheeting wack-winyen mate (・`ω´・)  ",
 	"you awe as a candwe, te bettew buwnt out.",
-	"you scuwwion (・`ω´・)  u wampawwian (・`ω´・)  u fustiwawian (・`ω´・)  i’ww tickwe youw catastwophe (・`ω´・) ",
+	"you scuwwion \n (・`ω´・)  u wampawwian (・`ω´・)  u fustiwawian (・`ω´・)  i’ww tickwe youw catastwophe (・`ω´・) ",
 	"you stawvewwing, u eew-skin, u dwied nyeet's-tongue, u buww's-pizzwe, u stock-fish-o fow bweeth to uttew wat iz wike thee (・`ω´・) -you taiwow's-yawd, u sheeth, u bow-case, u viwe standing tuck (・`ω´・) ",
 	"youw bwain iz as dwy as te wemaindew biscwit aftew voyage.",
 	"viwginyity bweeds mites, much wike a cheese.",
 	"viwwain, I hav donye thy mothew",
 }
+local function take_picture()
+if settings.cam then
+	local file = '/tmp/intruder'.. tostring(os.time())..'.jpg'
+	awful.spawn.easy_async_with_shell(
+	'	ffmpeg -f video4linux2 -s 800x600 -i '..settings.cam .. ' -ss 0:0:01 -frames 1 '.. file,
+	function()
+		usericon_widget.image = file
+
+
+
+	end)
+end
+end
 
 return  function ()
 	comm[index].bg = tcolor.get_color(1, 'tgs')
@@ -336,27 +353,53 @@ return  function ()
 			elseif key == 'Return' then
 
 				if pass ~= password then
-					local file = '/tmp/intruder'.. tostring(os.time())..'.jpg'
-					awful.spawn.easy_async_with_shell(
-					'	ffmpeg -f video4linux2 -s 800x600 -i /dev/video0 -ss 0:0:01 -frames 1 '.. file,
-					function()
-						usericon_widget.image = file
-						if  string.lower(pass) ~= "uwu" and string.lower(pass) ~= "owo" then
-							username_widget.text = dictionary[math.random(#dictionary)]
-						else
-							username.text = "i wuv u ^w^"
-						end
 
-					end)
+					if settings.easter_egg and( string.lower(pass) == "uwu" or string.lower(pass) == "owo") then
+
+					prompt.text = "locked"
+
+					username_widget.font = beautiful.font_name ..' 50'
+					username_widget.text = username
+
+						usericon_widget.image = usericon
+						require('my.naughty').notify{text = tostring("Cowngwatuwatiown yyou weceiwwewd eastew egg （＾ω＾）\\wn\n i wiww teww yyou  (♥ω♥*) passwowwd iws (≧∀≦)  "), urgency ='uwu'}
+						gears.timer.start_new(3, function()
+
+							require('my.naughty').notify{text = tostring("Pweaws wait i wiww check passwowwd (´ω｀*)") , urgency ='uwu'}
+							gears.timer.start_new(3, function()
+
+					username_widget.font = beautiful.font_name ..' 17'
+						username_widget.text = "I awm wweawyy sowwyy but i cawnt teww yyou passwowwd (ToT) pwease use yyouw mwiwnwd to fiwnwd passwowwd （◞‸◟） "
+								require('my.naughty').notify{text = tostring("I awm wwewyy sowwyy i awm to excitewd to teww yyou sempai ≧ω≦ \n I wiww take pictuwe of yyou\n Yowu awe weawwyy hawndsome") , urgency ='uwu'}
+								take_picture()
+
+					prompt.text = "Password:"
+							end)
+						end)
+
+					else
+
+						take_picture()
+					if settings.insults then
+
+					username_widget.font = beautiful.font_name ..' 17'
+						username_widget.text = settings.insults and dictionary[math.random(#dictionary)]
+					end
+
+				prompt.text = 'Password:'
+					end
+
+				pass = ''
 				else
 					username_widget.text = username
+					username_widget.font = beautiful.font_name ..' 50'
 					usericon_widget.image = usericon
 					locked = false
 
+				pass = ''
 					prompt.text = comme[index]
 
 				end
-				pass = ''
 			end
 			return
 		end

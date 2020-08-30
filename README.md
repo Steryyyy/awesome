@@ -1,6 +1,6 @@
 
 
-<img src="https://github.com/Steryyyy/awesome/blob/master/screenshots/alll.jpg" width="75%">
+<img src="https://github.com/Steryyyy/awesome/blob/master/screenshots/alll.jpg" width="100%">
 
 
 
@@ -123,7 +123,7 @@ Go to ~/.config/awesome/settings.lua
 And change terminal
 
 
-## Change clients tags
+## Change clients "rules"
 Go to ~/.config/awesome/tools/connect.lua
 
 And change find_class

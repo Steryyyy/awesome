@@ -1,0 +1,6 @@
+#!/bin/sh
+MENU=$(lua $HOME/.config/awesome/scripts/luamenu.lua)
+echo $MENU > $HOME/.config/awesome/config/menu.lua
+
+echo "$HOME/.config/awesome/config/menu.lua"
+cat $HOME/.config/awesome/config/menu.lua | sed 's/{/\n{/g'

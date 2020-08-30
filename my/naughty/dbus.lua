@@ -14,7 +14,7 @@ local tcat = table.concat
 local tins = table.insert
 local unpack = unpack or table.unpack
 local naughty = require("my.naughty.core")
--- local cst = require("my.naughty.constants")
+
 local nnotif = require("my.naughty.notification")
 
 local capabilities = {

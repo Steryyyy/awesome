@@ -6,8 +6,6 @@ if dbus then
     naughty.dbus = require("my.naughty.dbus")
 end
 naughty.notification = require("my.naughty.notification")
-
-
 local function screen_fallback()
     if capi.screen.count() == 0 then
         gdebug.print_warning("An error occurred before a scrren was added")
@@ -57,5 +55,4 @@ do
     end)
 
 end
-
 return naughty

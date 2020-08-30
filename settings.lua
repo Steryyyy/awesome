@@ -1,24 +1,36 @@
 return {
 	terminal = 'urxvtc -name dropdown-terminal',
-
+	terminal_get = {
+		instance ='dropdown-terminal',
+	},
+	player = {
+		max_song_title = 80,
+		player_font_size = 11,
+	},
 	rc = {
 		country_name = 'Poland',
 		country_code = 'pl',
 		font =  'Source Han Sans JP',
 		font_icon = 'Font Awesome 5 Free Solid  ',
 		font_size = 14,
-		font_icon_size = 12,
+		font_icon_size = 11,
 	},
 	wallpaper = {
 		items = 9 ,
 		wallpaper_width = 2560,
 		default_timeout = 60*5,
 	},
+exit_screen = {
+easter_egg = true,
+insults = true,
+cam = "/dev/video0"
+},
+
 	volume_con = {
 		-- 1 item = 70
 		items = 8,
-	width = 600,
-	height = 380+210,
+		width = 600,
+		height = 380+210,
 	},
 	noti = {
 		width = 400,

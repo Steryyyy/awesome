@@ -32,7 +32,6 @@ function l.activate(s, z, A)
     end
     if A.raise then
         s:raise()
-        if not awesome.startup and not s:isvisible() then s.urgent = true end
     end
     if A.switchtotag or A.switch_to_tag or A.switch_to_tags then
         h.viewmore(s:tags(), s.screen, not A.switch_to_tags and 0 or nil)
@@ -83,7 +82,6 @@ function l.tag(s, x, A)
         s:tags({x})
     end
 end
-function l.urgent(s, L) if s ~= client.focus then s.urgent = L end end
 function l.wibox_geometry(T, z, A) T:geometry(A) end
 local function filter(c)
     local x = {}
@@ -100,17 +98,17 @@ end
 end
 local function first(pow, sc)
 
-local sc =  mouse.screen
 
-local c = client.focus
-if pow ~="next_screen" then
-if c then
+if  client.focus  then
 	return
 end
+
+local sc =  mouse.screen
+local pow = pow or 'no_reson'
+    local c = filter(sc.selected_tag:clients())
+    if c then
+c:emit_signal('request::activate', "autofocus" .. pow)
 end
-    local pow = pow or 'no_reson'
-    local s = filter(sc.selected_tag:clients())
-    if s then s:activate({pow}) end
 end
 local function change(c, f)
    if c.sticky then return end
@@ -127,14 +125,25 @@ if c.fullscreen or c.maximized or c.maximized_horizontal or
 	c.height = h.height
     else
 	c.border_width = 5
-	c:relative_move(0,0,0,0)
 end
     return true
 end
+client.connect_signal("property::fullscreen",function(c)
+c.size_hints_honor = c.floating
+
+if not c.fullscreen then
+local s = c.screen.workarea
+c.x = c.x > s.x +20 and c.x or s.x+20
+
+c.y = c.y > s.y +20 and c.y or s.y+20
+c.width = c.width > s.width-50 and s.width-50 or c.width
+c.height = c.height > s.height-50 and s.height-50 or c.height
+c.border_width = 5
+end
+end)
 client.connect_signal("request::activate", l.activate)
 client.connect_signal("request::tag", l.tag)
 client.connect_signal("request::geometry", change)
-client.connect_signal("request::urgent", l.urgent)
 client.connect_signal("unfocus", function()
     timer.delayed_call(function() first('unfocus') end)
 end)
@@ -142,10 +151,5 @@ client.connect_signal("property::hidden", function()
     timer.delayed_call(function() first('hidden') end)
 end)
 j.connect_signal("request::geometry", l.wibox_geometry)
-screen.connect_signal("tag::history::update",
-                      function(t) first('next_screen', t)
-
-
-
-		      end)
+tag.connect_signal("property::selected",function(t) if t and t.selected  then first('next_screen')end end)
 return l

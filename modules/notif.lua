@@ -51,7 +51,6 @@ local last_timer = timer({
     timeout = 3,
     callback = function(e)
 
-
         last_not.visible = false
         e:stop()
 
@@ -183,12 +182,11 @@ notifbox_template.time = os.time()
 last_not.height = h
 last_not.width = w
 
-
     if args.urgency == 'critical' then
         lock = true
 
         last_timer:stop()
-        notify(notifbox_template,args.urgency)
+	 notify(notifbox_template,args.urgency)
 
     else
         if  urgency ~='hide'then
@@ -203,16 +201,14 @@ last_not.width = w
 	menus:set_children(men)
     end
         if not suspend or args.urgency =='urgent' or   args.urgency =='hide'  then
-           if not lock then
+           if not lock   then
 		notify(notifbox_template,args.urgency)
 
             last_timer:again()
     end
 
         end
-
     end
-
 end
 
 naughty.connect_signal("request::display", naughty.default_notification_handler)

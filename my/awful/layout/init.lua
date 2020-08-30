@@ -34,7 +34,7 @@ function j.get(screen)
     return tag.getproperty(n, "layout") or j.suit.floating
 end
 function j.inc(q, i, r)
-  
+
     i = h(i or b.focused())
     local n = i.selected_tag;
     if not n then return end
@@ -139,7 +139,6 @@ end
 local function O(N) j.arrange(N.screen) end
 a.client.connect_signal("property::size_hints_honor", M)
 a.client.connect_signal("property::struts", O)
-a.client.connect_signal("property::minimized", M)
 a.client.connect_signal("property::sticky", M)
 a.client.connect_signal("property::fullscreen", M)
 a.client.connect_signal("property::maximized_horizontal", M)
@@ -199,9 +198,9 @@ Z = function()
     a.tag.disconnect_signal("new", Z)
     if #k == 0 then
         j.append_default_layouts({
-            j.suit.floating, j.suit.tile, j.suit.tile.left, j.suit.tile.bottom,
-            j.suit.tile.top, j.suit.fair, j.suit.fair.horizontal, j.suit.max,
-            j.suit.max.fullscreen
+            j.suit.tile, j.suit.tile.left, j.suit.tile.bottom,
+            -- j.suit.tile.top, j.suit.fair, j.suit.fair.horizontal, j.suit.max,
+            -- j.suit.max.fullscreen
         })
     end
     Z = nil

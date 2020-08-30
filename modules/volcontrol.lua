@@ -9,16 +9,13 @@ local settings = require('settings').volume_con
 local pos = 1
 local maxitems = settings.items > 5  and settings.items or 5
 
-local base =
-    [[ | grep -e "index\|volume: \|alsa.card_name\|mute\|device.description" | grep -v "base" |   sed -E '5~5 a|' | awk -F',' '{print $1}' | tr -d '\n'   | tr '|' '\n' |  tr -d '"' | tr -d '%'  | tr -d '/'  | sed -e 's/dB//' -e  's/index://' -e  's/muted://' -e 's/volume://' |tr -d '=' | awk   '(v=substr($0,3,1))($0=substr($0,4))(g=substr($0,index($0,$13)))(a="")(d="")(c="")(e="") (d=index($0,"device.description" )+ 20) (a=index($0,"alsa.card_name")+16) {if(d >a) {(c=substr($0,a,d-22-a)) (e=substr($0,d)) }else { (c=substr($0,a)) (e=substr($0,d,a-d-18))}  }    {print $1"|"c"|"$4"|" $6"|" e"|"v}'
-        ]]
-local client_base =
-    [[ | grep -e 'media.filename\|index:\|volume\|sink:\|source:\|muted\|application.name ='  | sed -e 's/dB//' -e  's/volume://'  -e  's/source://g' -e  's/mono://g' -e 's/front-left://'| tr -d '/' | awk -F',' '{print $1}' |sed -e 's/sink://' -e 's/index://' -e 's/application.name//'  -e 's/media.filename//' -e 's/muted://'  |  sed -E '5~5 a|' | tr -d '\n'    | sed -E 's/\|/\n/g' | sed -e 's/[|_%_"_=]/ /g'  -e  's/<.*>//'  | awk '{print $1"|"$2"|"$4"|"$6"|"substr($0,index($0,$7))}'
-]]
-local list_sinks = "pacmd list-sinks " .. base
-local list_sources = "pacmd list-sources " .. base
-local list_sinks_inputs = [[pacmd list-sink-inputs  ]] .. client_base
-local list_source_outputs = [[pacmd list-source-outputs   ]] .. client_base
+local client_base = " | awk -f ~/.config/awesome/scripts/get_clients.awk"
+local base = " | awk -f ~/.config/awesome/scripts/get_cards.awk"
+local pacmd = "LANG=C pacmd "
+local list_sinks = pacmd .."list-sinks" .. base
+local list_sources = pacmd.. "list-sources" .. base
+local list_sinks_inputs = pacmd.. "list-sink-inputs" .. client_base
+local list_source_outputs = pacmd.. "list-source-outputs" .. client_base
 local colors = {
     '#ff0000', '#ff0000', '#ff0000', '#ff0000', '#ff0000', '#ff0000', '#ff0000',
     '#ff0000', '#ff0000'
@@ -604,14 +601,14 @@ function public.start()
             public.start()
         elseif key == 'K' then
             if chosen_tab == false then kill(pos) end
-        elseif key == ' ' then
+        elseif key == ' ' or key == 'XF86AudioMute' then
             public.mute(chosen_tab, pos)
 
-        elseif key == 'Left' then
+        elseif key == 'Left' or key == 'XF86AudioLowerVolume' then
 
             public.change_volume(chosen_tab, pos, -5)
 
-        elseif key == 'Right' then
+        elseif key == 'Right' or key =='XF86AudioRaiseVolume' then
             public.change_volume(chosen_tab, pos, 5)
         elseif key == 'Tab' then
             change_tab()

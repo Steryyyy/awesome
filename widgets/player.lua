@@ -3,24 +3,21 @@ local awful = require("my.awful")
 -- Widget and layout library
 local wibox = require("my.wibox")
 local gears = require("my.gears")
-local terminal = require('settings').terminal
 
 local beautiful = require("my.beautiful")
+local settings = require('settings').player
+local max_song_title = settings.max_song_title or 60
 local icon_play = ' '
 local icon_pause = ' '
 local icon_next = ''
 local icon_prev = ' '
-local sp_album = '/home/steryyy/.config/awesome/images/album.png'
 
 local icon_spotify = ''
 local icon_cmus = ''
 
 local get_vol = [[
         pacmd list-sink-inputs | grep -e "index"  -e "volume" -e "application.name ="  | sed -E '3~3 a|' | tr -d "\n"   | tr -d "%" | sed -E 's/\|/\n/g' | awk '{print $2"|" $7"|" substr($0,index($0,$20))}' ]]
-local getspotufy_album = [[
-    wget -O ]] .. sp_album ..
-                             [[ "http://i.scdn.co/image/"$(sp art |  sed -e 's/^.*\///')
-]]
+local getspotufy_album = [[ curl "http://i.scdn.co/image/"$(sp art |  sed -e 's/^.*\///') > ~/.config/awesome/images/album.png ]]
 local get_spotify = [[
     (sp status && sp current-oneline) | tr '\n' ' ' | sed 's/ | /|/g' | awk '{print $1"|"substr($0,index($0,$2))"|" }'
 
@@ -43,6 +40,7 @@ widget_prev.font=beautiful.font_icon
 local widget_next = wibox.widget.textbox(icon_next)
 widget_next.font=beautiful.font_icon
 local widget_song = wibox.widget.textbox('', false, '#000000')
+widget_song.font = beautiful.font_name ..' Bold ' .. (settings.player_font_size  or 12)
 local widget_spawn = wibox.widget.textbox(icon_spotify)
 widget_spawn.font =beautiful.font_icon
 
@@ -240,8 +238,8 @@ player.spotify_state = function()
 
             song.artist = arr[2]
             song.song = arr[3]
-            awful.spawn.easy_async_with_shell(getspotufy_album, function(out)
-                song.cover = sp_album
+            awful.spawn.easy_async_with_shell(getspotufy_album, function()
+                song.cover = '~/.config/awesome/images/album.png'
 
             end)
 
@@ -329,14 +327,14 @@ player.spawn = function()
     if player.selected == 'spotify' then
         awful.spawn("spotify", false)
     else
-        awful.spawn.with_shell("awesome-client 'Request=true' &&  " .. terminal ..' -e '..player.selected )
+        awful.spawn.with_shell("awesome-client ' dropdown_terminal_open([["..player.selected.."]])'" )
     end
 end
 end
 player.trimsong = function(songname)
 
     if not songname then return end
-	if string.len(songname) > 50 then songname = songname:sub(1, 50) end
+	if string.len(songname) > max_song_title then songname = songname:sub(1, max_song_title) end
 local ine = string.find(songname,'%.')
 if ine then
 songname = songname:sub(1,ine-1)

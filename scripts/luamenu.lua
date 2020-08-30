@@ -1,5 +1,5 @@
 #!/bin/lua
-local term = [[awesome-client  "dropdown_terminal_open('%s')"]]
+local term = "awesome-client  'dropdown_terminal_open("
 local c =  io.popen([[(echo /usr/share/pixmaps/* && (echo /usr/share/icons/hicolor/*/*/* /usr/share/app-info/icons/*/*/* |tr " " "\n"| grep "48\|36\|32\|26"))| tr " " "\n" | grep png |awk -F '/' '!seen[$NF]++' ]])
 local ico = c:lines()
 local icons ={}
@@ -13,7 +13,6 @@ local f = assert(io.open(fil,'rb'))
 local content = f:read('*all')
 return content
 end
-
 local apps = {}
 
 local file= io.popen('find /usr/share/applications/ -name "*.desktop"'):lines()
@@ -21,7 +20,7 @@ for d in  file do
 
 local f = readfile(d)
 
-local name,exec,icon=nil
+local name,exec,icon,isterm=nil
 for token in string.gmatch(f,"[^\n]+") do
 	if string.find(token,'Name=') and  token:sub(1,1) =='N' and name ==nil then
  name = string.gsub(token,'Name=','')
@@ -31,9 +30,12 @@ token =string.gsub(token,'Exec=','')
 		local ind = string.find(token,'%%')
 if not ind  then ind = #token+1 end
 		exec =    token:sub(1,ind-1)
+		-- exec = isterm and  term ..'[['..exec ..']])"' or nil
 elseif string.find(token,'Terminal=true') and token:sub(1,1) =='T'   then
-exec = nil
-break
+exec = exec and term ..'[['..exec .."]])'" or nil
+
+isterm = true
+-- break
 elseif string.find(token,'Icon=') and token:sub(1,1) =='I' and icon==nil  then
 local ic = string.gsub(token,'Icon=','')
 
@@ -67,9 +69,9 @@ end
 
 table.sort(apps,function(a,b) return a[1] < b[1] end   )
 if #apps > 0 then
-local sen = 'return'
+local sen = 'return{'
 for _,t in pairs(apps) do
-sen = sen ..'{"'..t[1]..'",[['..t[2]..']]'.. (t[3] and ',"'.. t[3] ..'"' or '') .."},"
+sen = sen ..'{"'..t[1]..'","'..t[2]..'"'.. (t[3] and ',"'.. t[3] ..'"' or '') .."},"
 end
 print(sen..'}')
 end

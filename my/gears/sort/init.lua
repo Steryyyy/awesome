@@ -1,1 +1,1 @@
-return {topological = require("my.gears.sort.topological")}
+return {topological=require("my.gears.sort.topological")}

@@ -8,12 +8,9 @@ local wibox = require("my.wibox")
 local beautiful = require("my.beautiful")
 
 local naughty = require("my.naughty")
-
-local ruled = require("my.ruled")
-local home = os.getenv('HOME')
 local settings = require('settings').rc
 
-beautiful.init(home .. "/.config/awesome/theme.lua")
+beautiful.useless_gap = 5
 beautiful.notification_icon_size = 60
 
 beautiful.fg_normal = '#ffffff'
@@ -21,7 +18,6 @@ beautiful.font_name = settings.font
 beautiful.font = beautiful.font_name .. ' Bold '.. settings.font_size
 beautiful.font_icon_name = settings.font_icon
 beautiful.font_icon = settings.font_icon .. settings.font_icon_size
-local show_exit =  require('modules.exit_screen')
 local tools = require('tools')
 local widgets = require("widgets")
 
@@ -37,7 +33,8 @@ end)
 tag.connect_signal("request::default_layouts", function()
     awful.layout.append_default_layouts({
 
-        awful.layout.suit.fair, awful.layout.suit.fair.horizontal
+        awful.layout.suit.fair, awful.layout.suit.fair.horizontal,
+	awful.layout.suit.tile.right
 
     })
 end)
@@ -162,50 +159,6 @@ screen.connect_signal("request::desktop_decoration", function(s)
   s.bottom:struts({bottom = 20})
 
     s.bottom:set_widget(bottom_widget)
-    s.bottom:connect_signal("button::press", function(_, _, _, b)
-        if b == 3 then show_exit() end
-    end)
 end)
 
-ruled.client.connect_signal("request::rules", function()
-
-    ruled.client.append_rule {
-        id = "global",
-        rule = {},
-        properties = {
-            focus = false,
-            raise = true,
-            size_hints_honor = false,
-            screen = awful.screen.preferred,
-
-            border_width = 5,
-            minimized = false,
-            maximized = false,
-            border_color = beautiful.border_color_normal
-        }
-    }
-
-    ruled.client.append_rule {
-        id = "floating",
-        rule_any = {
-            instance = {"copyq", "pinentry"},
-            class = {
-                "Blueman-manager", "Gpick", "Kruler", "Sxiv", "Tor Browser",
-                "Wpa_gui", "veromix", "xtightvncviewer", 'mpv'
-            },
-
-            name = {"Event Tester"},
-            role = {"AlarmWindow", "ConfigManager", "pop-up"}
-        },
-        properties = {floating = true, size_hints_honor = true}
-    }
-
-end)
-client.connect_signal("focus", function(c)
-    c.border_color = beautiful.border_color_active
-
-end)
-client.connect_signal("unfocus", function(c)
-    c.border_color = '#000000'
-end)
 require('modules.init')

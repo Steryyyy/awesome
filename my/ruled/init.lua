@@ -1,1 +1,0 @@
-return{client=require("my.ruled.client")}

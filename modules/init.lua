@@ -1,8 +1,10 @@
+require('keybindings')
+--[[
 local awful = require("my.awful")
 local player = require('widgets.player')
 local net = require('widgets.net')
 local menu = require('modules.startmenu')
-local terminal_toggle = require('tools.connect')
+local connect= require('tools.connect')
 local battery = require('widgets.battery')
 
 local modkey = 'Mod4'
@@ -13,7 +15,6 @@ awful.keyboard.append_global_keybindings(
     {
 
         awful.key({modkey}, "x", menu.show),
-
         awful.key({modkey}, "p", player.spawn),
         awful.key({modkey}, "w", menu.wallpaper_show),
         awful.key({modkey}, "n", menu.notify_show),
@@ -25,27 +26,23 @@ awful.keyboard.append_global_keybindings(
         awful.key({modkey}, "XF86AudioPlay", player.prev),
         awful.key({}, "XF86AudioStop", player.change),
         awful.key({}, "XF86Search", menu.show),
-
         awful.key({modkey}, "XF86AudioRaiseVolume", player.inc),
         awful.key({modkey}, "XF86AudioLowerVolume", player.dec),
-
-        awful.key({modkey}, "q", terminal_toggle),
+        awful.key({modkey}, "q", connect.toggle),
         awful.key({}, "XF86AudioRaiseVolume", volume_up),
         awful.key({}, "XF86AudioLowerVolume", volume_down),
-
         awful.key({}, "XF86AudioMute", volume_mute),
         awful.key({modkey, 'Shift'}, "XF86AudioMute", mic_mute),
-
         awful.key({modkey, 'Shift'}, "XF86AudioRaiseVolume", mic_up),
         awful.key({modkey, 'Shift'}, "XF86AudioLowerVolume", mic_down)
 
     })
-function filter(i)
+local function filter(i)
     if i.type == "desktop" or i.type == "dock" or i.type == "splash" or
         not i.focusable or i.hidden then return nil end
     return i
 end
-function client_idx(i)
+ local function client_idx(i)
     local c = client.focus
         local x = {}
         local nex = nil
@@ -156,7 +153,7 @@ local x, y = c.screen.workarea.x, c.screen.workarea.y
 
 end
 local re = 20
-function rezide(e, r)
+local  function rezide(e, r)
     local c = client.focus
     res = r and re or -re
 
@@ -204,7 +201,7 @@ awful.keyboard.append_global_keybindings(
                   function() awful.client.swap.byidx(1) end),
         awful.key({modkey, "Shift"}, "k",
                   function() awful.client.swap.byidx(-1) end),
-        awful.key({modkey}, "u", awful.client.urgent.jumpto),
+        awful.key({modkey}, "u", connect.to_urgent),
         awful.key({modkey}, "l", function() awful.tag.incgap(5) end),
         awful.key({modkey}, "h", function() awful.tag.incgap(-5) end),
         awful.key({modkey, 'Control','Shift'}, "h", function()
@@ -346,4 +343,4 @@ awful.keyboard.append_global_keybindings(
         awful.key({modkey, 'Control'}, "Left", function() move_client(-1) end),
         awful.key({modkey, 'Control'}, "Right", function() move_client(1) end)
     })
-
+--]]

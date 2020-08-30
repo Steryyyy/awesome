@@ -4,8 +4,7 @@ local widget = {
     base = require("my.wibox.widget.base"),
     textbox = require("my.wibox.widget.textbox"),
     imagebox = require("my.wibox.widget.imagebox"),
- --   systray = require("my.wibox.widget.systray"),
-    --textclock = require("my.wibox.widget.textclock"),
+
     progressbar = require("my.wibox.widget.progressbar")
 
 }

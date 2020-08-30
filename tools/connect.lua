@@ -1,217 +1,147 @@
 local awful = require("my.awful")
-
-local gears = require("my.gears")
-local term_com = require('settings').terminal
-local fullhight = false
-
-local terminals = {}
-local index = 1
-
- Request = false
-local function position()
-    if terminals[index] == nil then return end
-
-    terminals[index].hidden = not terminals[index].hidden
-    terminals[index].height = (fullhight and mouse.screen.geometry.height or
-                                  mouse.screen.geometry.height / 2)
-    terminals[index].x = mouse.screen.geometry.x
-    terminals[index].y = mouse.screen.geometry.y
-    terminals[index].width = mouse.screen.geometry.width
-if not terminals[index].hidden then
+local beautiful = require("my.beautiful")
+local get_term = require('settings').terminal_get
+local urgent = {}
+local floating_table = {
+	instance = {"copyq", "pinentry"},
+	class = {
+		"Blueman-manager", "Gpick", "Kruler", "Sxiv", "Tor Browser",
+		"Wpa_gui", "veromix", "xtightvncviewer", 'mpv'
+	},
+	name = {"Event Tester"},
+	role = {"AlarmWindow", "ConfigManager", "pop-up"}
+}
 
 
-    terminals[index]:emit_signal("request::activate", "mouse_click",
-    {raise = false})
-end
+next_floating = false
 
-end
+local function move_and_toggle(c, t)
+	if c.first_tag.index ~= t and not  (c.sticky) then
+		if not urgent[t] then
+			awesome.emit_signal("u",t)
+		end
 
-function move_and_toggle(c, t)
-    if c.first_tag.index ~= t and not  (c.sticky) then
-if (not mouse.screen.tags[t].urgent) then
-        c.urgent = true
-	awful.client.urgent.add(c,"urgent")
-end
-
-        c:move_to_tag(mouse.screen.tags[t])
-else
-        c.urgent = false
-	awful.client.urgent.delete(c)
-    end
+		c:tags{mouse.screen.tags[t]}
+	end
 end
 
 local function set_default(c)
-
-    c.focus = awful.client.focus.filter
-    if c.floating then
-    c.rise = true
-    local s = c.screen.workarea
-    c.x = (s.width - c.width-30)/2 + s.x
-    c.y = (s.height - c.height-30)/2 + s.y
-
-     c:relative_move(0,0,0,0)
-end
+if c.size_hints  then
+	c.width = c.size_hints.min_width or 300
+	c.height = c.size_hints.min_height or 300
 end
 
-local function dropdown(i)
-    if #terminals <= 1 then return end
-    terminals[index].hidden = true
-    index = index + i
-    if index > #terminals then
-        index = 1
-    elseif index < 1 then
-        index = #terminals
-    end
-    position()
+		c.rise = true
+		local s = c.screen.workarea
+		c.x = not c.fullscreen and (s.width - c.width-10)/2 + s.x or s.x
+		c.y = not c.fullscreen and(s.height - c.height-10)/2 + s.y or s.y
+
+		c:relative_move(0,0,0,0)
 end
+
 local function find_class(c)
-    set_default(c)
-    if c.class == 'firefox' then
-        move_and_toggle(c, 2)
-        return true
+	if c.class == 'firefox' then
+		move_and_toggle(c, 2)
+		return true
 
-    elseif c.class == "Spotify" then
-        move_and_toggle(c, 4)
-        c:connect_signal('unmanage',
-                         function() require('widgets').player.status() end)
-        return true
-    elseif c.class == 'discord' then
-        move_and_toggle(c, 3)
-        return true
-    elseif c.class == 'Steam' then
-        move_and_toggle(c, 5)
-        return true
-    end
+	elseif c.class == "Spotify" then
+		move_and_toggle(c, 4)
+		c:connect_signal('unmanage',
+		function() require('widgets').player.status() end)
+		return true
+	elseif c.class == 'discord' then
+		move_and_toggle(c, 3)
+		return true
+	elseif c.class == 'Steam' then
+		move_and_toggle(c, 5)
+		return true
+	end
 
-    return false
-end
-local dele = false
-local function manage(c)
-
-    if c.instance == 'dropdown-terminal' or c.instance == 'dropdown-terminalr' then
-
-        c.size_hints_honor = false
-        c.floating = true
-        c.index = #terminals + 1
-        table.insert(terminals, c)
-        c.keys = gears.table.join(awful.key({'Mod4'}, "Return", function()
-            Request = true
-            awful.spawn.with_shell(term_com)
-        end), awful.key({'Mod4'}, "f", function()
-
-	fullhight = not fullhight
-            terminals[index].height = (fullhight and
-                                          mouse.screen.geometry.height or
-                                          mouse.screen.geometry.height / 2)
-        end), awful.key({'Mod4'}, "KP_Left", function()
-            c.width = c.screen.geometry.width / 2
-            c.height = c.screen.geometry.height
-            c.x = c.screen.geometry.x
-            c.y = c.screen.geometry.y
-        end), awful.key({'Mod4'}, "KP_Right", function()
-            c.width = c.screen.geometry.width / 2
-            c.height = c.screen.geometry.height
-            c.x = c.screen.geometry.width - c.width + c.screen.geometry.x
-            c.y = c.screen.geometry.y
-        end), awful.key({'Mod4'}, "KP_Up", function()
-            c.width = c.screen.geometry.width
-            c.height = c.screen.geometry.height / 2
-            c.x = c.screen.geometry.x
-            c.y = c.screen.geometry.y
-        end), awful.key({'Mod4'}, "KP_Down", function()
-            c.width = c.screen.geometry.width
-            c.height = c.screen.geometry.height / 2
-            c.x = c.screen.geometry.x
-            c.y = c.screen.geometry.height - c.height + c.screen.geometry.y
-        end), awful.key({'Mod1'}, "Right", function(c) dropdown(1) end),
-                                  awful.key({'Mod1'}, "Left",
-                                            function() dropdown(-1) end),
-                                  awful.key({'Mod1'}, "q", function(c)
-
-            dele = true
-            c:kill()
-        end))
-        c.sticky = true
-        c.border_width = 0
-        c.hidden = true
-        c:connect_signal('unmanage', function(c)
-
-            table.remove(terminals, c.index)
-            for a, b in pairs(terminals) do b.index = a end
-            index = 1
-            if dele then
-                dele = false
-                position()
-            end
-        end)
-        c:connect_signal('unfocus', function(c) c.hidden = true end)
-
-        c.ontop = true
-        c.y = 0
-        c.x = 0
-        c.width = c.screen.geometry.width
-        c.height = c.screen.geometry.height / 2
-
-        move_and_toggle(c, 6)
-
-        if Request or c.instance == 'dropdown-terminalr' then
-            c.instance = 'dropdown-termil'
-            if #terminals > 1 then terminals[index].hidden = true end
-            index = c.index
-
-            position()
-
-            Request = false
-
-
-        end
-
-        return true
-    end
-    return false
-end
-next_floating = false
-client.connect_signal("manage", function(c)
-
-    if manage(c) then return end
-
-    if c.class == '' or c.class == nil then
-        move_and_toggle(c, 6)
-        c:connect_signal('property::class', function(c) find_class(c) end)
-        return
-    end
-    find_class(c)
-
-if c.first_tag.index == mouse.screen.selected_tag.index then
-c:activate()
+	return false
 end
 
-    if next_floating then
-	    c.floating = true
-    end
-    if awesome.startup and not c.size_hints.user_position and
-        not c.size_hints.program_position then
-c:relative_move(0,0,0,0)
 
-    end
+
+client.connect_signal("request::manage",function(c)
+	c.screen = awesome.startup and c.screen or mouse.screen
+	c:tags  {awesome.startup and c.first_tag or mouse.screen.selected_tag}
+	c.border_width = (c.fullscreen or c.sticky ) and 0 or 5
+	c.border_color = "#000000"
+	c.size_hints_honor = false
+	c.raise = false
+	c.minimized = false
+	c.maximized = false
+	c.keys = awful.keyboard._get_client_keybindings()
+	c.buttons = awful.mouse._get_client_mousebindings()
+
+
 end)
 
-
-local function toggle()
-
-    if #terminals == 0 then
-        Request = true
-        awful.spawn.with_shell(term_com)
-        return
-    end
-
-    if #terminals >= index and index > 0 then
-
-        position()
-
-    else
-        return
-    end
+client.connect_signal("manage", function(c)
+-- terminal is managed in tools/terminal.lua
+for a,b in pairs (get_term) do
+if c[a] ==b then
+	return
+end
 end
 
-return toggle
+	if c.class == '' or c.class == nil then
+		move_and_toggle(c, 6)
+		c:connect_signal('property::class', function(c) find_class(c) end)
+		return
+	end
+
+	if next_floating then
+		c.floating = true
+	else
+		for i,a in pairs(floating_table) do
+			for _,b in pairs(a) do
+				if c[i] ==b then
+					c.floating = true
+					break
+				end
+			end
+		end
+	end
+	find_class(c)
+if c.floating then
+set_default(c)
+end
+	if c.first_tag and c.first_tag.index == mouse.screen.selected_tag.index  then
+			c:emit_signal('request::activate', "manage",{raise = true})
+	end
+	if awesome.startup and not c.size_hints.user_position and
+		not c.size_hints.program_position then
+		c:relative_move(0,0,0,0)
+
+	end
+end)
+
+client.connect_signal("focus", function(c)
+	c.border_color = beautiful.border_color_active
+
+end)
+client.connect_signal("unfocus", function(c)
+	c.border_color = '#000000'
+end)
+local public ={}
+function public.to_urgent()
+	for i=1,5 do
+		if urgent[i] then
+			if mouse.screen.tags then
+
+				mouse.screen.tags[i]:view_only()
+
+			end
+			urgent[i]= nil
+			break
+		end
+	end
+end
+
+awesome.connect_signal("u", function(n)
+	urgent[n] = not  urgent[n]
+
+end)
+
+return public

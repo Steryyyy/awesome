@@ -3,7 +3,7 @@ local gobject = require("my.gears.object")
 local gtable = require("my.gears.table")
 
 local gfs = require("my.gears.filesystem")
--- local cst = require("my.naughty.constants")
+
 local naughty = require("my.naughty.core")
 
 local pcommon = require("my.awful.permissions._common")

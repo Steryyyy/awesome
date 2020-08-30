@@ -11,7 +11,8 @@ local color_array  =
 	},
 }
 }
-function init_cols()
+
+local   function init_cols()
 local ar = require('tools.colors.create')
 
 if ar then

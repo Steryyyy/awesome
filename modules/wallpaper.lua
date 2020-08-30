@@ -78,7 +78,7 @@ wallpapers_wibox:setup{
 
 }
 -- functions
-function change_wallpaper(dir, file)
+local  function change_wallpaper(dir, file)
     if type(dir) == 'string' then
         for i, a in pairs(wallpapers) do
             if a[1] == dir then
@@ -100,6 +100,7 @@ function change_wallpaper(dir, file)
         tcolor.change_colors(file,dir)
     else
 
+        tcolor.change_colors(1, 1)
     end
 end
 local function random_wallpaper()
@@ -157,7 +158,7 @@ local function update()
             a.visible = false
         else
             a:get_children()[1]:get_children()[1].image =
-                '/home/steryyy/.config/awesome/images/thumbnail/' .. t[i][1] ..
+                thumbnail_dir .. t[i][1] ..
                     '/' .. t[i][2] .. '.jpg'
 
             a.visible = true
