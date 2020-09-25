@@ -17,147 +17,40 @@ local list_sources = pacmd.. "list-sources" .. base
 local list_sinks_inputs = pacmd.. "list-sink-inputs" .. client_base
 local list_source_outputs = pacmd.. "list-source-outputs" .. client_base
 local colors = {
-    '#ff0000', '#ff0000', '#ff0000', '#ff0000', '#ff0000', '#ff0000', '#ff0000',
-    '#ff0000', '#ff0000'
+    '#c6c3c2','#f6e5d9','#f8f4f2','#f8f4f2','#f6bd52','#ff0000'
 }
+local SHIFT = 0
 
-local function create_tab(name, shape)
+local COLOR = {SELECTED = 5 ,UNSELECTED = 4,MUTED= 6}
+local TYPES = { SINK = 1, SOURCE = 2,INPUT = 3,OUTPUT = 4}
+local TYPES_NAMES= {'sink','source','sink-input','source-output'}
 
-    local cce = wibox.widget {
-        {
-            {
-                layout = wibox.layout.fixed.vertical,
-                {text = name, align = 'center', widget = wibox.widget.textbox},
-                {
-                    wibox.widget.base.make_widget(),
-
-                    forced_height = 5,
-
-                    id = 'bg',
-                    widget = wibox.container.background
-                }
-            },
-            left = 20,
-            right = 20,
-            widget = wibox.container.margin
-        },
-
-        shape = shape,
-        widget = wibox.container.background
-    }
-
-    return cce
-end
-local sel = ''
-local unsel = ''
-local muted = ''
-local function create_page()
-
-    local ge = wibox.layout.fixed.vertical()
-    return ge
-end
-
+local tabs = {}
+local volume_pages = {}
+local cards = {}
+local clients = {}
+local default_card = {}
 local volume_wibox = wibox {width = settings.width or   560, height =  settings.height  or 380}
 volume_wibox.fg = '#000000'
 volume_wibox.ontop = true
 volume_wibox.visible = false
 
 local chosen_tab = true
-local tabs = {}
 local tab_layout = wibox.layout.flex.horizontal()
 tab_layout.spacing = -15
 tab_layout.forced_height = 30
-tabs[true] = create_tab('Cards', tshape.leftstart)
-tabs[false] = create_tab('Clients', tshape.taskendleft)
 
-tab_layout:add(tabs[true])
-tab_layout:add(tabs[false])
-
-local volume_pages = {}
-volume_pages[true] = create_page()
-volume_pages[false] = create_page()
-
-volume_pages[true].visible = true
-
-volume_pages[false].forced_height = settings.height or 380
-volume_pages[true].forced_height = volume_pages[false].forced_height
-local bord = wibox.widget {
-            layout = wibox.layout.fixed.vertical,
-            volume_pages[true],
-            volume_pages[false]
-
-}
-
-volume_wibox:setup{layout = wibox.layout.fixed.vertical, tab_layout, bord}
-local cards = {}
-local clients = {}
-local default_card = {}
-
-    muted = '#ff0000'
-
-local function get_volume(vol) return math.floor(65536 * vol / 100) end
-local function update_color()
-
-    unsel = tcolor.get_color(1, 'w')
-    colors[1] = tcolor.get_color(2, 'w')
-    colors[2] = tcolor.get_color(3, 'w')
-    colors[3] = tcolor.get_color(4, 'w')
-    -- widgets
-    volume_wibox.bg = unsel
-    sel = tcolor.get_color(5, 'w')
-
-    tabs[true].bg = colors[1]
-    tabs[false].bg = colors[2]
-    tabs[chosen_tab]:get_children_by_id('bg')[1].bg = sel
-    tabs[not chosen_tab]:get_children_by_id('bg')[1].bg = unsel
-
-    for _, vol in pairs(volume_pages) do
-        local cild = vol:get_children()
-
-        for i, a in pairs(cild) do
-
-                a:get_children_by_id('card_bg')[1].bg = colors[1]
-                a:get_children_by_id('name_bg')[1].bg = colors[2]
-                a:get_children_by_id('volume_bg')[1].bg = colors[3]
-                a.bg = unsel
-a:get_children_by_id('type_bg')[1].bg = colors[1]
-                if i < 3 then
-
-if default_card[i] then
-
-                local col = sel
-	if default_card[i].muted then
-col = "#ff0000"
+local function get_typename(t)
+    return (t==TYPES.SINK and 'Sink' ) or (t ==TYPES.SOURCE and 'Source') or t==TYPES.INPUT and 'Input' or 'Output'
 end
-	a:get_children_by_id('volume')[1].color = col
-		end
-		end
-
-                a:get_children()[1]:get_children()[1].bg = colors[1]
-if i ==pos then a.bg = sel else
-		a.bg = unsel
-	end
-
-end
-
-    end
-end
-awesome.connect_signal('color_change', function() update_color() end)
-
-
 
 
 local function get_vol_text(mute, volume)
 
     return ((mute == true and '') or (volume > 50 and '') or
                (volume > 20 == true and '') or ''),
-           (mute and "#ff0000" or sel)
+           (mute and colors[COLOR.MUTED] or colors[COLOR.SELECTED])
 
-end
-
-local public = {}
-local function get_typename(t)
-    return (t=='sink' and 'Sink' ) or (t =='source' and 'Source') or t=='sink-input' and 'Input' or 'Output'
 end
 
 local function wid_update(w, tab, nam)
@@ -173,21 +66,22 @@ local function wid_update(w, tab, nam)
 end
 local function get_card(t, id)
     for _, a in pairs(default_card) do
-        if (t == 'sink-input' and a.type == 'sink' and tonumber(a.id) ==
-            tonumber(id)) or
-            (t == 'source-ouput' and a.type == 'source' and tonumber(a.id) ==
-                tonumber(id)) then return a end
+	    if tonumber(a.id) == tonumber(id) and (t-2 == a.type )  then
+	return a
+	end
+
     end
     for _, a in pairs(cards) do
-        if (t == 'sink-input' and a.type == 'sink' and tonumber(a.id) ==
-            tonumber(id)) or
-            (t == 'source-ouput' and a.type == 'source' and tonumber(a.id) ==
-                tonumber(id)) then return a end
+	    if tonumber(a.id) == tonumber(id) and (t-2 == a.type )  then
+	return a
+	end
     end
 
     return {name == nil}
 
 end
+
+
 
 local function update(tru, t)
     local cc = tru and cards or clients
@@ -202,12 +96,12 @@ local function update(tru, t)
  local shift =ce < maxitems and 0 or (ce-pos < math.ceil(maxitems/2) and ce - maxitems)  or (pos > math.ceil(maxitems/2) and pos -math.ceil(maxitems/2)) or 0
  if  tru then shift =  shift -2  end
  local seel = ce < maxitems and pos or ( ce-pos < math.ceil(maxitems/2) and maxitems-(ce-pos)) or pos < math.ceil(maxitems/2) and pos or math.ceil(maxitems/2)
-
+SHIFT = shift
     local function update_one(i, a)
         if i == seel then
-                a.bg = sel
+                a.bg = colors[COLOR.SELECTED]
         else
-            a.bg = unsel
+            a.bg = colors[COLOR.UNSELECTED]
         end
 
         if tru then
@@ -239,23 +133,133 @@ local function update(tru, t)
     end
 
 end
+
 local function change_tab()
     pos = 1
     chosen_tab = not chosen_tab
 
     volume_pages[not chosen_tab].visible = false
 
-    tabs[chosen_tab]:get_children_by_id('bg')[1].bg = sel
-    tabs[not chosen_tab]:get_children_by_id('bg')[1].bg = unsel
+    tabs[chosen_tab]:get_children_by_id('bg')[1].bg = colors[COLOR.SELECTED]
+    tabs[not chosen_tab]:get_children_by_id('bg')[1].bg = colors[COLOR.UNSELECTED]
 
     volume_pages[chosen_tab].visible = true
     update(chosen_tab)
 
 end
+
+local function create_tab(name, shape)
+
+    local cce = wibox.widget {
+        {
+            {
+                layout = wibox.layout.fixed.vertical,
+                {text = name, align = 'center', widget = wibox.widget.textbox},
+                {
+                    wibox.widget.base.make_widget(),
+
+                    forced_height = 5,
+
+                    id = 'bg',
+                    widget = wibox.container.background
+                }
+            },
+            left = 20,
+            right = 20,
+            widget = wibox.container.margin
+        },
+
+        shape = shape,
+        widget = wibox.container.background
+    }
+    cce:connect_signal("button::press", function(_,_,_,b)
+if b == 1 then
+change_tab()
+end
+end)
+
+
+    return cce
+end
+local function create_page()
+
+    local ge = wibox.layout.fixed.vertical()
+    return ge
+end
+
+tabs[true] = create_tab('Cards', tshape.leftstart)
+tabs[false] = create_tab('Clients', tshape.taskendleft)
+
+tab_layout:add(tabs[true])
+tab_layout:add(tabs[false])
+
+volume_pages[true] = create_page()
+volume_pages[false] = create_page()
+
+volume_pages[true].visible = true
+
+volume_pages[false].forced_height = settings.height or 380
+volume_pages[true].forced_height = volume_pages[false].forced_height
+local bord = wibox.widget {
+            layout = wibox.layout.fixed.vertical,
+            volume_pages[true],
+            volume_pages[false]
+
+}
+
+volume_wibox:setup{layout = wibox.layout.fixed.vertical, tab_layout, bord}
+
+
+local function get_volume(vol) return math.floor(65536 * vol / 100) end
+local function update_color()
+
+	colors[1] = tcolor.get_color(2, 'w')
+	colors[2] = tcolor.get_color(3, 'w')
+	colors[3] = tcolor.get_color(4, 'w')
+	colors[COLOR.UNSELECTED] = tcolor.get_color(1,'w')
+	colors[COLOR.SELECTED] = tcolor.get_color(5,'w')
+	-- widgets
+	volume_wibox.bg = colors[COLOR.UNSELECTED]
+
+	tabs[true].bg = colors[1]
+	tabs[false].bg = colors[2]
+	tabs[chosen_tab]:get_children_by_id('bg')[1].bg = colors[COLOR.SELECTED]
+	tabs[not chosen_tab]:get_children_by_id('bg')[1].bg = colors[COLOR.SELECTED]
+
+	for f, vol in pairs(volume_pages) do
+		local cild = vol:get_children()
+
+		for i, a in pairs(cild) do
+
+			a:get_children_by_id('card_bg')[1].bg = colors[1]
+			a:get_children_by_id('name_bg')[1].bg = colors[2]
+			a:get_children_by_id('volume_bg')[1].bg = colors[3]
+			a.bg = colors[COLOR.UNSELECTED]
+
+			a:get_children_by_id('type_bg')[1].bg = colors[1]
+			a:get_children_by_id('volume')[1].color =  ((f and i >3 and cards[i-2].muted ) or (f and i <3 and default_card[i].muted)or (not f and clients[i].muted)) and colors[COLOR.MUTED] or colors[COLOR.SELECTED]
+			a:get_children()[1]:get_children()[1].bg = colors[1]
+			if i ==pos then a.bg = colors[COLOR.SELECTED] else
+				a.bg = colors[COLOR.UNSELECTED]
+			end
+
+		end
+
+	end
+end
+awesome.connect_signal('color_change', function() update_color() end)
+
+
+
+
+local public = {}
 local function change_default(id)
     if id < 3 then return end
     id = id - 2
-    local i = cards[id].type == 'sink' and 1 or 2
+    if not cards[id] or not cards[id].type then
+	    return
+    end
+    local i = cards[id].type
 
     local c = default_card[i]
     default_card[i] = cards[id]
@@ -264,7 +268,7 @@ local function change_default(id)
     cards[id] = c
 
     awful.spawn.with_shell(
-        'pacmd set-default-' .. default_card[i].type .. ' ' ..
+        'pacmd set-default-' .. TYPES_NAMES[ i] .. ' ' ..
             default_card[i].id)
   update(true)
 
@@ -280,15 +284,10 @@ function public.change_volume(object, ind, am)
             ind = ind - 2
         end
     end
-    cc[ind].volume = cc[ind].volume + am
+    cc[ind].volume = (cc[ind].volume + am > 100 and 100) or( cc[ind].volume +am < 0 and 0 )or cc[ind].volume +am
 
-    if cc[ind].volume < 0 then
-        cc[ind].volume = 0
-    elseif cc[ind].volume > 100 then
-        cc[ind].volume = 100
-    end
 
-    awful.spawn.with_shell('pacmd set-' .. cc[ind].type .. '-volume ' ..
+    awful.spawn.with_shell('pacmd set-' .. TYPES_NAMES [cc[ind].type] .. '-volume ' ..
                                cc[ind].id .. ' ' ..
                                tostring(get_volume(cc[ind].volume)))
     update(object)
@@ -296,30 +295,26 @@ function public.change_volume(object, ind, am)
 end
 local function function_change(pos)
 
-    if not clients[pos] then return end
-    local i = clients[pos].type == 'sink-input' and 1 or 2
+    if not clients[pos] or not clients[pos].type then return end
 
-    local c = {default_card[i].id}
-    local ce = clients[pos].card
+    local c = {default_card[clients[pos].type-2].id}
+    local ce = tonumber(clients[pos].card)
     for _, a in pairs(cards) do
-        if (i == 1 and a.type == 'sink') or i == 2 and a.type == 'source' then
+        if ( clients[pos].type-2 == a.type )  then
             table.insert(c, a.id)
 
         end
     end
+    for i=1,#c do
 
-    for i, a in ipairs(c) do
-
-        if ce == a then
-            local ind = i + 1 <= #c and i + 1 or 1
-            ce = c[ind]
-            break
+        if ce == c[i] then
+ ce = c[ i+1 > #c and 1 or i+1]
+break
         end
 
     end
-
     awful.spawn.easy_async_with_shell(
-        'pacmd move-' .. clients[pos].type .. ' ' .. clients[pos].id .. ' ' ..
+        'pacmd move-' ..  TYPES_NAMES[clients[pos].type] .. ' ' .. clients[pos].id .. ' ' ..
             ce, function(out)
 
             if out ~= "" then
@@ -334,6 +329,7 @@ local function function_change(pos)
 end
 function public.mute(object, ind)
     local cc = object and cards or clients
+    if not ind then  return end
     if object then
         if ind < 3 then
             cc = default_card
@@ -344,19 +340,20 @@ function public.mute(object, ind)
     end
     cc[ind].muted = not cc[ind].muted
 
-    awful.spawn.with_shell('pacmd set-' .. cc[ind].type .. '-mute ' ..
+    awful.spawn.with_shell('pacmd set-' .. TYPES_NAMES[cc[ind].type] .. '-mute ' ..
                                cc[ind].id .. ' ' .. tostring(cc[ind].muted))
     update(object)
 
 end
 
-local function widgets_create(tt)
+local function widgets_create(tt,te,ind)
+	if not tt then return end
     local icon,volume_color = get_vol_text(tt.muted, tt.volume)
     local card = tt.card
-    if tt.type == 'sink-input' or tt.type == 'source-ontput' then
+    if tt.type  > 2 then
         card = get_card(tt.type, tt.card).name or 'Card dont exist'
     end
-    return wibox.widget {
+    local widg = wibox.widget {
         {
             {
                 {
@@ -457,63 +454,84 @@ id ='type_bg',
             margins = 5,
             widget = wibox.container.margin
         },
-        bg = unsel,
+        bg = colors[COLOR.UNSELECTED],
         forced_height = 70,
         widget = wibox.container.background
     }
 
+    widg:get_children_by_id('volume_layout')[1]:connect_signal("button::press",function(_,_,_,b)
+
+	    local ind = te and ind < 3 and ind or te and ind +SHIFT +2 or ind
+	    if b == 1 then
+		    public.mute(te, ind)
+	    elseif b ==4 then
+		    public.change_volume(te,ind,5)
+	    elseif b ==5 then
+		    public.change_volume(te,ind,-5)
+	    end
+
+
+    end)
+    widg:get_children_by_id('card')[1]:connect_signal("button::press",function(_,_,_,b)
+	    if te  and ind <3 then
+		    return
+	    end
+	    local ind =  te and ind +SHIFT +2 or ind
+	    if b == 1 then
+		    if te then
+			    change_default(ind)
+		    else
+			    function_change(ind)
+		    end
+
+	    end
+    end)
+
+
+    return widg
 end
 local function create_items(command, arr, typ, calback)
 
-    awful.spawn.easy_async_with_shell(command, function(out)
+	awful.spawn.easy_async_with_shell(command, function(out)
+		for _, a in pairs(gears.string.split(out, "\n")) do
 
-        for i, a in pairs(gears.string.split(out, "\n")) do
+			local ar = gears.string.split(a, "|")
 
-            local ar = gears.string.split(a, "|")
+			if ar[2] then
+			ar[4] = ar[4] ~= 'no'
+				local object = {
 
-            if ar[2] then
+					id = tonumber(ar[1]),
+					name = ar[5],
+					volume =  tonumber(ar[3]),
+					muted = ar[4],
+					card = ar[2],
+					type = typ
+				}
 
-                if ar[4] == 'no' then
-                    ar[4] = false
-                else
-                    ar[4] = true
-                end
+				if typ <3 and  ar[6] and ar[6] =='*' then
+					object.card = '#' .. object.card
+					default_card[typ] = object
+				else
+					arr[#arr + 1] = object
+				end
 
-                ar[3] = tonumber(ar[3])
 
-                arr[#arr + 1] = {
-                    id = ar[1],
-                    name = ar[5],
-                    volume = ar[3],
-                    muted = ar[4],
-                    card = ar[2],
-                    type = typ
+			end
 
-                }
-
-                if ar[6] then
-                    if ar[6] == '*' then
-                        arr[#arr].card = '#' .. arr[#arr].card
-
-                    end
-
-                end
-
-            end
-
-        end
-        calback()
-    end)
+		end
+		calback()
+	end)
 
 end
 local function get_clients()
     volume_pages[false]:set_children({})
     clients = {}
-    create_items(list_sinks_inputs, clients, 'sink-input', function()
-        create_items(list_source_outputs, clients, 'source-output', function()
+    create_items(list_sinks_inputs, clients, TYPES.INPUT, function()
+        create_items(list_source_outputs, clients, TYPES.OUTPUT, function()
 
-            for i, a in pairs(clients) do
-                local a = widgets_create(a)
+            for i, b in pairs(clients) do
+                local a = widgets_create(b,false,i)
                 if i >maxitems then
                     break
                 end
@@ -529,29 +547,20 @@ local function get_cards()
 
     volume_pages[true]:set_children({})
 
-    create_items(list_sinks, cards, 'sink', function()
-        create_items(list_sources, cards, 'source', function()
+    create_items(list_sinks, cards, TYPES.SINK, function()
 
-            for i, a in ipairs(cards) do
-                if string.find(a.card, '#') then
-                    table.remove(cards, i)
-                    if a.type == 'sink' then
-                        default_card[1] = a
-                    else
-                        default_card[2] = a
-                    end
-                end
-            end
+        create_items(list_sources, cards, TYPES.SOURCE, function()
 
-            for i = 1, 2 do
-                local a = widgets_create(default_card[i])
-                awesome.emit_signal('default-' .. default_card[i].type ..
+
+            for i,b in pairs(default_card) do
+                local a = widgets_create(b,true ,i)
+                awesome.emit_signal('default-' .. TYPES_NAMES[b.type] ..
                                         '-change', a)
                 volume_pages[true]:add(a)
             end
 
             for i, ab in pairs(cards) do
-                local a = widgets_create(ab)
+                local a = widgets_create(ab,true ,i+2)
                 if i >maxitems-2 then
                     break
                 end
@@ -568,7 +577,7 @@ end
 local function kill(pos)
 
     awful.spawn.easy_async_with_shell(
-        'pacmd kill-' .. clients[pos].type .. ' ' .. clients[pos].id,
+        'pacmd kill-' .. TYPES_NAMES[ clients[pos].type] .. ' ' .. clients[pos].id,
         function(c) if c == '' then get_clients() end end)
 end
 get_cards()

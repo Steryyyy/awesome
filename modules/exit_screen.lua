@@ -8,13 +8,29 @@ local tcolor = require('tools.colors')
 local settings = require('settings').exit_screen
 
 local password = 'awesomeWm'
+
+
 local icon_font = beautiful.font_icon_name ..'50'
 local poweroff_text_icon = ""
 local reboot_text_icon = ""
 local restart_awesome_icon = ""
 local exit_text_icon = ""
 local lock_text_icon = ""
+local function check_password(pass)
+	local pam = nil -- require("liblua_pam")
+	if pam then
+		local auth = pam.auth_current_user(pass)
+		if auth then
+			return true
+		end
+		return false
+	end
+	if pass == password then
+		return true
+	end
 
+	return false
+end
 
 local function bgg(w, shape)
 	if shape == nil then shape = gears.shape.powerline end
@@ -130,7 +146,7 @@ for s in screen do
 		ontop = true,
 		screen = s,
 		fg = '#000000',
-		bg = '#000000AA'
+		bg = '#000000CC'
 	}))
 end
 local exit_screen_grabber
@@ -153,7 +169,7 @@ local function change(i)
 		prompt.text = comme[index]
 	end
 end
-function exit_screen_hide()
+local function exit_screen_hide()
 	if locked  then
 		return
 	end
@@ -174,21 +190,21 @@ for _,a in pairs(exit_screens) do
 	a:connect_signal("button::press",function(_,_,_,b)
 		if b == 1 then
 
-		if index == #comm then
-			locked = true
-			prompt.text = 'Password:'
-		elseif index == 3 then
-			awesome.restart()
+			if index == #comm then
+				locked = true
+				prompt.text = 'Password:'
+			elseif index == 3 then
+				awesome.restart()
+			else
+				clock:start()
+			end
+		elseif b ==3 then
+
+			exit_screen_hide()
 		else
-			clock:start()
+
+			rotate( b ==4 and 1 or -1)
 		end
-	elseif b ==3 then
-
-exit_screen_hide()
-	else
-
-rotate( b ==4 and 1 or -1)
-	end
 	end)
 
 
@@ -310,17 +326,17 @@ local dictionary = {
 	"viwwain, I hav donye thy mothew",
 }
 local function take_picture()
-if settings.cam then
-	local file = '/tmp/intruder'.. tostring(os.time())..'.jpg'
-	awful.spawn.easy_async_with_shell(
-	'	ffmpeg -f video4linux2 -s 800x600 -i '..settings.cam .. ' -ss 0:0:01 -frames 1 '.. file,
-	function()
-		usericon_widget.image = file
+	if settings.cam then
+		local file = '/tmp/intruder'.. tostring(os.time())..'.jpg'
+		awful.spawn.easy_async_with_shell(
+		'	ffmpeg -f video4linux2 -s 800x600 -i '..settings.cam .. ' -ss 0:0:01 -frames 1 '.. file,
+		function()
+			usericon_widget.image = file
 
 
 
-	end)
-end
+		end)
+	end
 end
 
 return  function ()
@@ -352,14 +368,25 @@ return  function ()
 				prompt.text = 'Password:' .. pass:gsub('.', '*')
 			elseif key == 'Return' then
 
-				if pass ~= password then
 
+				if check_password(pass) then
+
+					username_widget.text = username
+					username_widget.font = beautiful.font_name ..' 50'
+					usericon_widget.image = usericon
+					locked = false
+
+					prompt.text =  comme[index]
+
+					pass = ''
+				else
+					prompt.text = comme[index]
 					if settings.easter_egg and( string.lower(pass) == "uwu" or string.lower(pass) == "owo") then
 
-					prompt.text = "locked"
+						prompt.text = "locked"
 
-					username_widget.font = beautiful.font_name ..' 50'
-					username_widget.text = username
+						username_widget.font = beautiful.font_name ..' 50'
+						username_widget.text = username
 
 						usericon_widget.image = usericon
 						require('my.naughty').notify{text = tostring("Cowngwatuwatiown yyou weceiwwewd eastew egg （＾ω＾）\\wn\n i wiww teww yyou  (♥ω♥*) passwowwd iws (≧∀≦)  "), urgency ='uwu'}
@@ -368,36 +395,28 @@ return  function ()
 							require('my.naughty').notify{text = tostring("Pweaws wait i wiww check passwowwd (´ω｀*)") , urgency ='uwu'}
 							gears.timer.start_new(3, function()
 
-					username_widget.font = beautiful.font_name ..' 17'
-						username_widget.text = "I awm wweawyy sowwyy but i cawnt teww yyou passwowwd (ToT) pwease use yyouw mwiwnwd to fiwnwd passwowwd （◞‸◟） "
+								username_widget.font = beautiful.font_name ..' 17'
+								username_widget.text = "I awm wweawyy sowwyy but i cawnt teww yyou passwowwd (ToT) pwease use yyouw mwiwnwd to fiwnwd passwowwd （◞‸◟） "
 								require('my.naughty').notify{text = tostring("I awm wwewyy sowwyy i awm to excitewd to teww yyou sempai ≧ω≦ \n I wiww take pictuwe of yyou\n Yowu awe weawwyy hawndsome") , urgency ='uwu'}
 								take_picture()
 
-					prompt.text = "Password:"
+								prompt.text = "Password:"
 							end)
 						end)
 
 					else
 
 						take_picture()
-					if settings.insults then
+						if settings.insults then
 
-					username_widget.font = beautiful.font_name ..' 17'
-						username_widget.text = settings.insults and dictionary[math.random(#dictionary)]
+							username_widget.font = beautiful.font_name ..' 17'
+							username_widget.text = settings.insults and dictionary[math.random(#dictionary)]
+						end
+
+						prompt.text = 'Password:'
 					end
 
-				prompt.text = 'Password:'
-					end
-
-				pass = ''
-				else
-					username_widget.text = username
-					username_widget.font = beautiful.font_name ..' 50'
-					usericon_widget.image = usericon
-					locked = false
-
-				pass = ''
-					prompt.text = comme[index]
+					pass = ''
 
 				end
 			end

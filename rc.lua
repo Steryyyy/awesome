@@ -39,7 +39,6 @@ tag.connect_signal("request::default_layouts", function()
     })
 end)
 local widget_spacing = -12
-
 function Power(wi, shape, typ)
     if not typ then typ = 'w' end
     if not shape then shape = tools.shapes.leftpowerline end
@@ -67,13 +66,8 @@ local coron = Power(wibox.widget {
 
     widget = wibox.widget.textbox
 }, tools.shapes.taskendleft)
-coron.forced_width = 240
-awful.spawn.easy_async_with_shell([[
-	[ "$(stat -c %y ~/.cache/corona| cut -d ' ' -f1)" = "$(date '+%Y-%m-%d')" ] || curl https://corona-stats.online/]]..settings.country_code  .. [[ | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" > ~/.cache/corona ;
-
-	grep  "]].. settings.country_name.. [[" ~/.cache/corona | sed 's/\s*//g'| sed 's/║/ /g' | sed 's/│/:/g' | awk -F':' '{if ($6~"▲"){}else {$6="0▲"}  }{if($4~"▲"){}else {$4="0▲"}}{print $3"|"$4"|"$9"⚠|"$5 "☠|"$6  }'
-
-	]], function(out) coron:get_children()[1]:get_children()[1].text = out end)
+awful.spawn.easy_async_with_shell([[ [ "$(stat -c %y ~/.cache/corona| cut -d ' ' -f1)" = "$(date '+%Y-%m-%d')" ] || curl https://corona-stats.online/]]..settings.country_code  .. [[ | awk 'gsub("\033\\[[0-9]*m","")' > ~/.cache/corona ; awk -F'│' '/]]..settings.country_name..[[/ && gsub("\\s","") && gsub("║","") {{if ($6~"▲"){}else {$6="0▲"}  }{if($4~"▲"){}else {$4="0▲"}} print $3"|"$4"|"$9"⚠|"$5 "☠|"$6  }  ' ~/.cache/corona ]],
+function(out) coron:get_children()[1]:get_children()[1].text = out end)
 local wwi = wibox.widget {
     layout = wibox.layout.fixed.horizontal,
     Power(widgets.player.widget),

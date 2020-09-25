@@ -1,0 +1,5 @@
+back/
+config/
+images/
+tools/colors/[^i]*.lua
+liblua_pam.so

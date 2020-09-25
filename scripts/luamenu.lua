@@ -1,6 +1,8 @@
 #!/bin/lua
 local term = "awesome-client  'dropdown_terminal_open("
-local c =  io.popen([[(echo /usr/share/pixmaps/* && (echo /usr/share/icons/hicolor/*/*/* /usr/share/app-info/icons/*/*/* |tr " " "\n"| grep "48\|36\|32\|26"))| tr " " "\n" | grep png |awk -F '/' '!seen[$NF]++' ]])
+-- local c =  io.popen([[(echo "/usr/share/pixmaps/*" && (echo "/usr/share/icons/hicolor/*/*/*" "/usr/share/app-info/icons/*/*/*" "/usr/share/icons/Adwaita/*/*/*" |tr " " "\n"| grep "48\|36\|32\|26"))  | tr " " "\n" | grep png |awk -F '/' '!seen[$NF]++' ]])
+
+local c =  io.popen([[(echo /usr/share/pixmaps/* && (echo /usr/share/icons/hicolor/*/*/* /usr/share/app-info/icons/*/*/* /usr/share/icons/Adwaita/*/*/* |tr " " "\n"| grep "48\|36\|32\|26"))| tr " " "\n" | grep -v "symbolic" | grep png |awk -F '/' '!seen[$NF]++' ]])
 local ico = c:lines()
 local icons ={}
 for a in ico do
@@ -30,19 +32,19 @@ token =string.gsub(token,'Exec=','')
 		local ind = string.find(token,'%%')
 if not ind  then ind = #token+1 end
 		exec =    token:sub(1,ind-1)
-		-- exec = isterm and  term ..'[['..exec ..']])"' or nil
+		exec = isterm and  term ..'[['..exec ..']])"' or exec
 elseif string.find(token,'Terminal=true') and token:sub(1,1) =='T'   then
-exec = exec and term ..'[['..exec .."]])'" or nil
 
 isterm = true
+	exec = exec and term ..'[['..exec .."]])'" or nil
+
 -- break
 elseif string.find(token,'Icon=') and token:sub(1,1) =='I' and icon==nil  then
 local ic = string.gsub(token,'Icon=','')
 
-for i,a in pairs(icons) do
+for _,a in pairs(icons) do
 	if string.find(a,ic,1,true) then
 icon = a
-table.remove(icons,i)
 break
 end
 end

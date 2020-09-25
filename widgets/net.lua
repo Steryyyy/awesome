@@ -1,6 +1,6 @@
 local wibox = require("my.wibox")
 local gears = require("my.gears")
-
+local settings = require('settings').widgets.internet
 local awful = require("my.awful")
 local beautiful = require('my.beautiful')
 local naughty = require("my.naughty")
@@ -8,18 +8,18 @@ local naughty = require("my.naughty")
 local widget = wibox.widget.textbox("睊")
 widget.font = beautiful.font_icon
 
-local interface = "enp9s0"
+local interface =   settings.interface  or "enp9s0"
 local msg = "Wired network is disconnected"
 
 local mac = "N/A"
 local inet = "N/A"
-
+local nott = false
 local function net_update()
 
     mac = "N/A"
     inet = "N/A"
     awful.spawn.easy_async_with_shell("ip addr show " .. interface ..
-                                          [[| grep "inet \|link/ether"  | awk '{print $2}']],
+                                          [[| awk '/(inet |link\/ether)/ {print $2}' ]],
                                       function(out)
         local a = gears.string.split(out, "\n")
 
@@ -37,16 +37,10 @@ local function net_update()
 
             msg = "Wired network is disconnected</span>"
         end
-    end)
-end
-gears.timer {
-    timeout   = 530,
-    call_now  = true,
-    autostart = true,
-    callback  = net_update
-}
 
-function widget.notify()
+	if nott then
+		nott = false
+
     naughty.notify {
         appname = 'Internet widget',
         icon = widget.text,
@@ -54,5 +48,24 @@ function widget.notify()
         title = 'Internet state',
         urgency = 'hide'
     }
+	end
+    end)
 end
+gears.timer {
+    timeout   = 300,
+    call_now  = true,
+    autostart = true,
+    callback  = net_update
+}
+
+function widget.notify()
+	nott = true
+	net_update()
+end
+
+widget:connect_signal("button::press", function(_,_,_,b)
+if b == 1 then
+widget.notify()
+end
+end)
 return widget

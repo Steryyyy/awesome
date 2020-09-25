@@ -1,6 +1,5 @@
 local wibox = require("my.wibox")
-local GET_battery_CMD =
-    'cat /sys/class/power_supply/BAT*/capacity /sys/class/power_supply/BAT*/status '
+local settings = require('settings').widgets.battery
 local gears = require("my.gears")
 
 local awful = require("my.awful")
@@ -55,7 +54,10 @@ battery.widget = widget
 local mes = ''
 local noti =false
 local function update()
-    awful.spawn.easy_async_with_shell(GET_battery_CMD, function(out)
+if not settings then return end
+
+local GET_battery_CMD = 'cat '.. settings ..'/capacity '..settings.. '/status '
+	awful.spawn.easy_async_with_shell(GET_battery_CMD, function(out)
         out = gears.string.split(out, "\n")
 
         local batteryd = out[1]
@@ -75,7 +77,7 @@ local function update()
             naughty.notify {
                 appname = 'Battery widget',
                 icon = battery_icon.text,
-                title = 'Low battery',
+                title = 'Low battery ' .. status,
                 text = 'Only ' .. batteryd .. '%',
                 urgency = 'critical'
             }
@@ -98,16 +100,24 @@ end
 
 
 gears.timer {
-    timeout   = 120,
+    timeout   = 180,
     autostart = true,
     callback  = update
 }
+
 function battery.update() update() end
 
 function battery.notify()
 noti = true
 update()
 end
+
+
+battery.widget:connect_signal("button::press", function(_,_,_,b)
+if b == 1 then
+battery.notify()
+end
+end)
 
 return battery
 

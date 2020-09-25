@@ -3,9 +3,17 @@ return {
 	terminal_get = {
 		instance ='dropdown-terminal',
 	},
-	player = {
-		max_song_title = 80,
-		player_font_size = 11,
+	widgets = {
+		internet = {
+			interface = "enp9s0",
+
+
+		},
+		player = {
+			max_song_title = 80,
+			player_font_size = 11,
+		},
+		battery = "/sys/class/power_supply/BAT1",
 	},
 	rc = {
 		country_name = 'Poland',
@@ -19,12 +27,13 @@ return {
 		items = 9 ,
 		wallpaper_width = 2560,
 		default_timeout = 60*5,
+		wallpaper_command = "xwallpaper --zoom "
 	},
-exit_screen = {
-easter_egg = true,
-insults = true,
-cam = "/dev/video0"
-},
+	exit_screen = {
+		easter_egg = true,
+		insults = true,
+		cam = "/dev/video0"
+	},
 
 	volume_con = {
 		-- 1 item = 70

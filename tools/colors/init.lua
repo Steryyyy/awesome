@@ -4,15 +4,13 @@ local public = {}
 local color_array  =
 {{
 	{
-	w={'#5128aa','#6833dc','#b551dc','#7047ae','#6094a5'},
-	tg={'#dca19f','#f0cbc5','#f7e4f0','#d8c1da'},
-	tgs={"#b551dc", "#3f19aa",'#e1a705'},
-	tks={'#aa0302'}
+w={'#f8f4f2','#c6c3c2','#f6e5d9','#f8f4f2','#f6bd52'},
+tg={'#ab613b','#dd7d4c','#aa7862','#df7443'},
+tgs={'#f8f4f2','#c6c3c2',"#4229dc"},
 	},
 }
 }
-
-local   function init_cols()
+local function init_cols()
 local ar = require('tools.colors.create')
 
 if ar then

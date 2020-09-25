@@ -5,7 +5,7 @@ local wibox = require("my.wibox")
 local gears = require("my.gears")
 
 local beautiful = require("my.beautiful")
-local settings = require('settings').player
+local settings = require('settings').widgets.player
 local max_song_title = settings.max_song_title or 60
 local icon_play = ' '
 local icon_pause = ' '
@@ -15,16 +15,14 @@ local icon_prev = ' '
 local icon_spotify = ''
 local icon_cmus = ''
 
-local get_vol = [[
-        pacmd list-sink-inputs | grep -e "index"  -e "volume" -e "application.name ="  | sed -E '3~3 a|' | tr -d "\n"   | tr -d "%" | sed -E 's/\|/\n/g' | awk '{print $2"|" $7"|" substr($0,index($0,$20))}' ]]
-local getspotufy_album = [[ curl "http://i.scdn.co/image/"$(sp art |  sed -e 's/^.*\///') > ~/.config/awesome/images/album.png ]]
+local get_vol = "pacmd list-sink-inputs | awk -f ~/.config/awesome/scripts/get_clients.awk  "
+-- local getspotufy_album = [[ curl "http://i.scdn.co/image/"$(sp art |  sed -e 's/^.*\///') > ~/.config/awesome/images/album.png ]]
 local get_spotify = [[
-    (sp status && sp current-oneline) | tr '\n' ' ' | sed 's/ | /|/g' | awk '{print $1"|"substr($0,index($0,$2))"|" }'
+    (sp status && sp current-oneline) | tr '\n' ' ' |  awk '{print $1"|"substr($0,index($0,$2))"|" }'
 
 ]]
 local get_cmus = [[
-    cmus-remote -Q | grep "status\|file" |   sed  -e 's/^.*\///' -e 's/\..*$//' | tr '\n' ' ' | awk '{print$2"|"substr($0,index($0,$3)) }'
-
+    cmus-remote -Q | awk '/(status|file)/ {{gsub("^.*\\/","")}  a=a" "$0} END {{$0=a} print $2"|"$3"|"}'
 
 ]]
 
@@ -47,7 +45,7 @@ widget_spawn.font =beautiful.font_icon
 local function to_pulse(vol) return math.floor(65536 * vol / 100) end
 
 local player = {}
-player.color = {'#FF8C00'}
+player.color = {'#FF8C00','#ff0000'}
 player.volume =0
 local widget_volume = wibox.widget {
     max_value = 1,
@@ -120,19 +118,40 @@ awful.spawn.with_shell("dbus-send --print-reply=literal --dest=org.mpris.MediaPl
 
     end
 end
+local muted = false
 player.inc = function() change_volume(5) end
+local last_vol = 0
+player.mute = function()
+muted = not muted
+-- widget_volume.color = muted and player.color[2] or player.color[1]
+if player.selected ~= "musicpv" then
+
+	awful.spawn.with_shell('pacmd set-sink-input-mute ' .. player.id ..
+                                   ' ' .. tostring(muted))
+	   else
+
+last_vol = muted and player.volume or last_vol
+
+player.volume = muted and 0 or last_vol
+awful.spawn.with_shell("dbus-send --print-reply=literal --dest=org.mpris.MediaPlayer2.musicpv /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Set string:'org.mpris.MediaPlayer2.Player' string:'Volume' variant:double:"..tostring(player.volume/100))
+end
+
+end
 player.dec = function() change_volume(-5) end
 local function get_volume(play)
     awful.spawn.easy_async_with_shell(get_vol .. "| grep '" .. play .. "'",
                                       function(out)
 
-        see = gears.string.split(out, '|')
+        local see = gears.string.split(out, '|')
 
         if see[2] then
 
             player.id = tonumber(see[1])
 
-            player.volume = tonumber(see[2])
+            player.volume = tonumber(see[3])
+	muted = see[4] == 'yes' and true or false
+
+widget_volume.color = muted and player.color[2] or player.color[1]
             widget_volume.value = player.volume / 100
 
         end
@@ -238,10 +257,12 @@ player.spotify_state = function()
 
             song.artist = arr[2]
             song.song = arr[3]
+            --[[
             awful.spawn.easy_async_with_shell(getspotufy_album, function()
                 song.cover = '~/.config/awesome/images/album.png'
 
             end)
+            --]]
 
             get_volume('Spotify')
 
@@ -343,6 +364,32 @@ end
     widget_song.text = songname
 
 end
+widget_spawn:connect_signal("button::press", function(_,_,_,b)
+if b == 1 then
+player.spawn()
+end
+end)
+widget_prev:connect_signal("button::press", function(_,_,_,b)
+if b == 1 then
+player.prev()
+end
+end)
+widget_next:connect_signal("button::press", function(_,_,_,b)
+if b == 1 then
+player.next()
+end
+end)
+widget_volume:connect_signal("button::press", function(_,_,_,b)
+
+if b == 1 then
+player.play()
+elseif b == 4 then
+player.inc()
+elseif b == 5 then
+	player.dec()
+end
+end)
+
 songwidget.visible = false
 player.widget = wibox.widget {
 

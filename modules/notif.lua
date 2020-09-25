@@ -57,10 +57,12 @@ local last_timer = timer({
     end
 })
 
+pcall(function()
+local su = require('config.notify')
+suspend = su
+            no.text = not suspend and '' or ''
+end)
 local function notify(widget,urgency)
-    if     urgency =='critical' then
-
-        end
             last_not:set_widget(widget)
             last_not.screen = mouse.screen
             last_not.x = mouse.screen.geometry.x + (mouse.screen.geometry.width - last_not.width) / 2
@@ -182,7 +184,15 @@ notifbox_template.time = os.time()
 last_not.height = h
 last_not.width = w
 
-    if args.urgency == 'critical' then
+if args.urgency == 'uwu' then
+
+		notify(notifbox_template,args.urgency)
+
+            last_timer:again()
+	    return
+end
+
+    if args.urgency == "critical" then
         lock = true
 
         last_timer:stop()
@@ -219,7 +229,7 @@ function public.stop()
     if gbber then awful.keygrabber.stop(gbber) end
 
 end
-function disp_time(time)
+local function disp_time(time)
 
   local st = 'now'
   if time > 60 then
@@ -247,6 +257,7 @@ end
         if key == 't' then
             suspend = not suspend
             no.text = not suspend and '' or ''
+	    awful.spawn.with_shell('echo "return ' .. tostring(suspend) ..'" > ~/.config/awesome/config/notify.lua')
 
         elseif key == ' ' or key == 'Return' then
 menus:remove_widgets(menus:get_children()[1])

@@ -4,3 +4,10 @@ echo $MENU > $HOME/.config/awesome/config/menu.lua
 
 echo "$HOME/.config/awesome/config/menu.lua"
 cat $HOME/.config/awesome/config/menu.lua | sed 's/{/\n{/g'
+
+read  -n 1 -p "Restart awesome[y/n]:" input
+
+if [ "$input" == "y" ] ; then
+echo ""
+	awesome-client "awesome.restart()" > /dev/null
+fi;

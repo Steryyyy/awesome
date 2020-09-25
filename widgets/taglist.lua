@@ -2,16 +2,15 @@ local wibox = require("my.wibox")
 local gears = require("my.gears")
 local tcolor = require('tools.colors')
 local beautiful = require('my.beautiful')
-local awful = require('my.awful')
 local widget = wibox.layout.flex.horizontal()
 widget.spacing = -12
 local urgent = {}
 local function taglistcolor(self, index)
-
+if not index then return end
 	self.bg = tcolor.get_color(index + 1, 'tg')
 	local g = false
 	for s in screen do
-
+if not s.tags or not s.tags[index] then  return end
 		if s.tags[index].selected  then
 			if s == mouse.screen then
 				self.bg = tcolor.get_color(1, 'tgs')

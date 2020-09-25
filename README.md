@@ -21,7 +21,7 @@
 | Name                                                                 | why?                                                                          |
 | ---                                                                  | ---                                                                           |
 | [cmus](https://github.com/cmus/cmus)                                 | for player widget                                                             |
-| [Source Han Sans JP](https://github.com/adobe-fonts/source-han-sans) | if you want japanese characters (beautiful.font_name default font) |
+| [Source Han Sans JP](https://github.com/adobe-fonts/source-han-sans) | if you want japanese characters |
 | [Font Awesome 5](https://fontawesome.com/)                           | for font icons ( has awesome in name so only works with awesomewm :))         |
 | [Nerd font](https://www.nerdfonts.com/font-downloads)                | for font icons                                                                |
 | awk                                                                  | for volume module and widgets player, net, status and corona tracked          |
@@ -53,8 +53,10 @@ File must contain something like that
 **Number of strings in arrays shouldn't be changed**
 ```lua
 return {
---chosen_array{
--- chosencol{
+--chosen_array
+{
+-- chosencol
+{
 w = {"col1","col2","col3","col4","col5"},
 tg = {"col1","col2","col3","col4"},
 tgs ={"col1","col2","col3"},
@@ -103,14 +105,18 @@ Example
     ├── 7.jpg
     ├── 8.jpg
     └── 9.jpg
-
+```
 Go to ~/.config/awesome/settings.lua
 And change wallpaper_width to your wallpaper resolution
+
+Run thumbnail.sh to generate thumbnails for wallpaper module
+```sh
+~/.config/awesome/scripts/thumbnail.sh
 ```
 ## Start menu
 Simply run
 ``` sh
-lua ~/.config/awesome/scripts/luamenu.lua > ~/.config/awesome/config/menu.lua
+~/.config/awesome/scripts/luamenu
 ```
 It should find desktop files from /usr/share/applications/
 
@@ -147,19 +153,19 @@ Return enter
 
 ### Volume and player
 
-| key binding                          | Action                                            |
-| ---                                  | ---                                               |
-| modkey + p                           | spawn player if is not running                    |
-| X86Audioplay                         | Player play/pause                                 |
-| modkey + X86Audioplay                | Player previous file                              |
-| modkey + X86AudioStop                | Player next file                                  |
-| modkey + X86AudioStop                | Player next player (cmus to spotify or other way) |
-| X86AudioMute                         | Mute sink input                                   |
-| X86AudioRaiseVolume                  | Default sink volume up                            |
-| X86AudioLowerVolume                  | Default sink volume down                          |
-| modkey + Shift + X86AudioMute        | Mute default source                               |
-| modkey + Shift + X86AudioRaiseVolume | Default source volume up                          |
-| modkey + Shift + X86AudioLowerVolume | Default source volume down                        |
+| key binding                 | Action                                            |
+| ---                         | ---                                               |
+| modkey + p                  | spawn player if is not running                    |
+| X86AudioPlay                | Player play/pause                                 |
+| XF86AudioPrev               | Player previous file                              |
+| XF86AudioNext               | Player next file                                  |
+| X86AudioStop                | Player next player (cmus to spotify or other way) |
+| X86AudioMute                | Mute sink input                                   |
+| X86AudioRaiseVolume         | Default sink volume up                            |
+| X86AudioLowerVolume         | Default sink volume down                          |
+| Shift + X86AudioMute        | Mute default source                               |
+| Shift + X86AudioRaiseVolume | Default source volume up                          |
+| Shift + X86AudioLowerVolume | Default source volume down                        |
 
 ### Switching to modules
 
@@ -292,7 +298,7 @@ Return enter
 | X86AudioLowerVolume | Default sink volume down                         |
 | Return              | Execute entry (lock and reload immediately )     |
 
-Mouse only work here.
+<!-- Mouse only work here. -->
 
 
 

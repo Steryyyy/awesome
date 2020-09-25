@@ -7,7 +7,8 @@ local battery = require('widgets.battery')
 local terminal = require('tools.terminal')
 local exit = require('modules.exit_screen')
 local modkey = 'Mod4'
-
+local altkey = 'Mod1'
+local control = 'Control'
 local function filter(i)
 if i.type == "desktop" or i.type == "dock" or i.type == "splash" or
 	not i.focusable or i.hidden then return nil end
@@ -54,40 +55,43 @@ local  global = {
 
 	awful.key({modkey}, "x", menu.show),
 	awful.key({modkey}, "p", player.spawn),
+	awful.key({}, "XF86Tools", player.spawn),
 	awful.key({modkey}, "w", menu.wallpaper_show),
 	awful.key({modkey}, "n", menu.notify_show),
 	awful.key({modkey}, "v", menu.volume_show),
 	awful.key({modkey}, "i", net.notify),
 	awful.key({modkey}, "b", battery.notify),
 	awful.key({}, "XF86AudioPlay", player.play),
-	awful.key({modkey}, "XF86AudioStop", player.next),
-	awful.key({modkey}, "XF86AudioPlay", player.prev),
+	awful.key({}, "XF86AudioNext", player.next),
+	awful.key({}, "XF86AudioPrev", player.prev),
 	awful.key({}, "XF86AudioStop", player.change),
 	awful.key({}, "XF86Search", menu.show),
-	awful.key({modkey}, "XF86AudioRaiseVolume", player.inc),
-	awful.key({modkey}, "XF86AudioLowerVolume", player.dec),
-	awful.key({modkey}, "q", terminal.toggle),
+	awful.key({altkey}, "XF86AudioRaiseVolume", player.inc),
+	awful.key({altkey}, "XF86AudioLowerVolume", player.dec),
+
+	awful.key({altkey}, "XF86AudioMute", player.mute),
 	awful.key({}, "XF86AudioRaiseVolume", volume_up),
 	awful.key({}, "XF86AudioLowerVolume", volume_down),
 	awful.key({}, "XF86AudioMute", volume_mute),
-	awful.key({modkey, 'Shift'}, "XF86AudioMute", mic_mute),
-	awful.key({modkey, 'Shift'}, "XF86AudioRaiseVolume", mic_up),
-	awful.key({modkey, 'Shift'}, "XF86AudioLowerVolume", mic_down),
+	awful.key({ 'Shift'}, "XF86AudioMute", mic_mute),
+	awful.key({ 'Shift'}, "XF86AudioRaiseVolume", mic_up),
+	awful.key({ 'Shift'}, "XF86AudioLowerVolume", mic_down),
 
+	awful.key({modkey}, "q", terminal.toggle),
 	awful.key({modkey}, "j", function()local c = client.focus if c then c:move_to_screen() else awful.screen.focus_relative(1)  end end),
 	awful.key({modkey}, "k", function()local c = client.focus if c then c:move_to_screen(c.screen.index - 1) else awful.screen.focus_relative(-1) end end),
 	awful.key({modkey}, "Tab", function() client_idx(1) end),
 	awful.key({modkey, 'Shift'}, "Tab", function() client_idx(-1) end),
-	awful.key({modkey, "Control"}, "n", function()local c = awful.client.restore()if c then c:activate{raise = true, context = "key.unminimize"}end end),
-	awful.key({modkey, "Control"}, "j",function() awful.screen.focus_relative(1) end),
-	awful.key({modkey, "Control"}, "k",function() awful.screen.focus_relative(-1) end),
+	awful.key({modkey, control}, "n", function()local c = awful.client.restore()if c then c:activate{raise = true, context = "key.unminimize"}end end),
+	awful.key({modkey, control}, "j",function() awful.screen.focus_relative(1) end),
+	awful.key({modkey, control}, "k",function() awful.screen.focus_relative(-1) end),
 
 	awful.key({modkey, "Shift"}, "j",function() awful.client.swap.byidx(1) end),
 	awful.key({modkey, "Shift"}, "k",function() awful.client.swap.byidx(-1) end),
 	awful.key({modkey}, "u", connect.to_urgent),
 	awful.key({modkey}, "l", function() awful.tag.incgap(5) end),
 	awful.key({modkey}, "h", function() awful.tag.incgap(-5) end),
-	awful.key({modkey, 'Control','Shift'}, "h", function()local tag = mouse.screen.tags[6]if tag then tag:view_only() end end),
+	awful.key({modkey, control,'Shift'}, "h", function()local tag = mouse.screen.tags[6]if tag then tag:view_only() end end),
 	awful.key({modkey}, "space", function() awful.layout.inc(1) end),
 	awful.key({modkey, "Shift"}, "space",function() awful.layout.inc(-1) end),
 
@@ -229,15 +233,17 @@ local function move_client(d)
 
 	local c = client.focus
 	local i = move_tag(d)
+	if c then
 	local tag = c.screen.tags[i]
-	if tag then if c then c:move_to_tag(tag) end end
+	if tag then  c:move_to_tag(tag)  end
+	 end
 
 end
 
 awful.keyboard.append_client_keybindings(
 {
 	awful.key({modkey}, "f", function(c) c.fullscreen = not c.fullscreen c:raise() end),
-	awful.key({modkey,"Control"}, "f", function(c)c.floating = not c.floating   end),
+	awful.key({modkey,control}, "f", function(c)c.floating = not c.floating   end),
 	awful.key({modkey, "Shift"}, "c", function(c)c:kill()end),
 	awful.key({modkey}, "m", function(c)c.maximized = not c.maximized c:raise()end)
 
@@ -256,9 +262,9 @@ local cc = {
 for i = 1, #aa do
 	awful.keyboard.append_client_keybindings(
 	{
-		awful.key({modkey, 'Control'}, aa[i],
+		awful.key({modkey, control}, aa[i],
 		function() rezide(cc[i], true) end),
-		awful.key({modkey, 'Shift', 'Control'}, aa[i],
+		awful.key({modkey, 'Shift', control}, aa[i],
 		function() rezide(cc[i], false) end),
 		awful.key({modkey}, aa[i], function() client_to(cc[i]) end),
 		awful.key({modkey, 'Shift'}, aa[i],
@@ -281,7 +287,7 @@ for i = 1, 5 do
 	{
 
 		awful.key({modkey}, "#" .. i + 9, function() totag(i) end),
-		awful.key({modkey, 'Control'}, "#" .. i + 9, function()
+		awful.key({modkey, control}, "#" .. i + 9, function()
 
 			local screen = awful.screen.focused()
 			local tag = screen.tags[i]
@@ -304,8 +310,8 @@ awful.keyboard.append_global_keybindings(
 {
 	awful.key({modkey}, "Left", function() move_tag(-1) end),
 	awful.key({modkey}, "Right", function() move_tag(1) end),
-	awful.key({modkey, 'Control'}, "Left", function() move_client(-1) end),
-	awful.key({modkey, 'Control'}, "Right", function() move_client(1) end)
+	awful.key({modkey, control}, "Left", function() move_client(-1) end),
+	awful.key({modkey, control}, "Right", function() move_client(1) end)
 })
 
 

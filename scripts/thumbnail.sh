@@ -1,8 +1,9 @@
 #!/bin/bash
 echo "removing ~/.config/awesome/images/thumbnail"
 rm -rf  ~/.config/awesome/images/thumbnail/
-echo "copying images from ~/wallpaper to ~/.config/awesome/images/thumbnail"
-cp -r ~/wallpaper/ ~/.config/awesome/images/thumbnail/
+mkdir -p ~/.config/awesome/images/thumbnail
+echo "copying images from ~/wallpaper/* to ~/.config/awesome/images/thumbnail"
+cp -r ~/wallpaper/* ~/.config/awesome/images/thumbnail/
 files=~/.config/awesome/images/thumbnail
 folder(){
 	 arr=($@)

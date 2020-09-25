@@ -18,12 +18,14 @@ local starmenu = wibox {
 	visible = false
 }
 local pos = 1
+local SHIFT = 0
 local maxitm = settings.items > 2 and settings.items or 10
 local colors = {'#ff0000', '#ffff00'}
 local selcolor = '#ffffff'
 local unselect = '#000000'
 local prompt = settings.prompt or 'Search'
 
+local search_str =''
 local last = ''
 local menu_items = {}
 local menus = wibox.layout.flex.vertical()
@@ -64,7 +66,7 @@ user_widget:set_spacing(-20)
 user_widget.forced_height = 35
 
 
-function readfile(fil)
+local function readfile(fil)
 	local f = io.open(fil,'rb')
 	if f then
 		local content = f:read()
@@ -74,7 +76,7 @@ function readfile(fil)
 	return ""
 
 end
-function get_dirsto()
+local function get_dirsto()
 	local d = readfile('/etc/os-release')
 	if d then
 		distro_name.text = d:sub(7)
@@ -88,7 +90,7 @@ awful.spawn.easy_async_with_shell('uname -r', function(out)
 
 end)
 
-local update_uptime = function()
+local function update_uptime ()
 	local d = readfile('/proc/uptime')
 	if d then
 		local t  = math.floor(string.match(d, "[%d]+"))
@@ -103,7 +105,7 @@ local update_uptime = function()
 		uptime_time.text =os.date('%d/%m/%Y ')..  h..':'..m
 	end
 end
-function get_aa()
+local function get_aa()
 	local be = require('config.menu')
 	if be then
 
@@ -142,6 +144,7 @@ local function update()
 	local r =(items -pos < math.ceil(maxitm/2))and items-maxitm or  (pos >  math.ceil(maxitm/2)and pos - math.ceil(maxitm/2)) or 0
 	r = r - 1
 	local ne = (items - pos < math.ceil(maxitm/2))and maxitm-(items-pos) or pos < math.ceil(maxitm/2) and pos or math.ceil(maxitm/2)
+	SHIFT = r +1
 	for i,b in ipairs(menus:get_children())do
 		if i == ne then
 			b.bg = selcolor
@@ -202,7 +205,54 @@ local function create_spacer(e)
 		widget = wibox.container.background
 	}
 end
-menus:add(create_spacer('Run'))
+
+local public = {}
+
+
+local gbb
+
+function public.hide()
+	starmenu.visible = false
+	clear()
+	search_str = ''
+	if gbb then
+		awful.keygrabber.stop(gbb)
+	end
+
+end
+
+local function run_program(pos)
+
+			local command = nil
+			if pos > 0 then
+				command = filtered[pos][2]
+
+
+			else
+				command =  search_str
+			end
+
+			if command then
+				awful.spawn.with_shell(command)
+
+			end
+
+			search_str = ''
+
+			clear()
+			search.text = prompt
+			--
+			public.hide()
+end
+
+local spacer = create_spacer('Run')
+spacer:connect_signal("button::press", function(_,_,_,b)
+if b == 1 then
+run_program(0)
+end
+end)
+
+menus:add(spacer)
 for i=1,maxitm do
 
 
@@ -248,21 +298,15 @@ for i=1,maxitm do
 	}
 	if (namee == '') then
 		widget.visible = false
+
 	end
-	menus:add(widget)
+	widget:connect_signal("button::press", function(_,_,_,b)
+if b == 1 then
+run_program(i+SHIFT)
 end
-local public = {}
-local gbb
+end)
 
-local search_str =''
-function public.hide()
-	starmenu.visible = false
-	clear()
-	search_str = ''
-	if gbb then
-		awful.keygrabber.stop(gbb)
-	end
-
+	menus:add(widget)
 end
 
 local function update_color()
@@ -375,6 +419,17 @@ local function prompt_text_with_cursor()
 	search.markup = prompt .. text_start .. "<span background=\"" ..  colors[1] .. "\">" .. char .. "</span>" .. text_end .. spacer
 	return ret
 end
+menu:connect_signal("button::press", function(_,_,_,b)
+if b == 4 then
+
+			pos = pos -1>0 and pos-1 or 1
+			update()
+		elseif b == 5 then
+
+			pos = pos +1
+			update()
+		end
+end)
 
 
 function public.show()
@@ -431,27 +486,8 @@ function public.show()
 
 			public.hide()
 		elseif key == 'Return' then
-			local command = nil
-			if pos > 1 then
-				command = filtered[pos -1][2]
 
-
-			else
-				command =  search_str
-			end
-
-			if command then
-				awful.spawn.with_shell(command)
-
-			end
-
-			search_str = ''
-
-			clear()
-			search.text = prompt
-			--
-			public.hide()
-
+			run_program(pos-1)
 		else
 
 			if key:wlen() == 1 then

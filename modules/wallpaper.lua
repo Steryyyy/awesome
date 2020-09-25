@@ -10,6 +10,7 @@ local pos = 1
 local max = 0
 local wallpaper_dir = home .. '/wallpaper/'
 local thumbnail_dir = home .. '/.config/awesome/images/thumbnail/'
+local wallpaer_changer = settings.wallpaper_command or "xwallpaper --zoom "
 local wallpapers = {}
 local item_num = settings.items  or 9
 local items = item_num
@@ -17,15 +18,13 @@ local middle = math.ceil(item_num / 2)
 local clock_timeout = 1
 local state = false
 local clock = 0
-local timeout = settings.default_timeout
+local timeout = (settings.default_timeout or (5*60))
 local chosen_dir = 1
 local chosen_file = 1
 local item_active = '#ff0000'
 local sel_box = 1
-
-mins = string.format("%02.f", math.floor(settings.default_timeout / 60));
-secs = string.format("%02.f", math.floor(settings.default_timeout - mins * 60));
-local default_time_text = mins .. ':' .. secs
+local SHIFT = 0
+local default_time_text =   string.format("%02.f", math.floor(timeout / 60))    .. ':' .. string.format("%02.f", timeout %60  )
 local sel_dir = 0
 
 local wallpaper_layout = wibox.layout.fixed.horizontal()
@@ -79,23 +78,14 @@ wallpapers_wibox:setup{
 }
 -- functions
 local  function change_wallpaper(dir, file)
-    if type(dir) == 'string' then
-        for i, a in pairs(wallpapers) do
-            if a[1] == dir then
-                dir = i
-                break
-            end
-        end
-    end
     if not wallpapers[dir] or not tonumber(file) then return end
 
     if wallpapers[dir][2] >= tonumber(file) then
         chosen_dir = dir
-
+        chosen_file = file
         local walpaper = wallpaper_dir .. wallpapers[dir][1] .. '/' .. file ..
                              '.jpg'
-        chosen_file = file
-        awful.spawn.with_shell('xwallpaper --zoom ' .. walpaper)
+        awful.spawn.with_shell(wallpaer_changer .. walpaper)
 
         tcolor.change_colors(file,dir)
     else
@@ -107,12 +97,12 @@ local function random_wallpaper()
 
     math.randomseed(os.time())
 
-    local dir =  math.random(1, #wallpapers)
+    local dir =  math.random( #wallpapers)
 
     if wallpapers[dir][2] then
-        local file = math.random(1, wallpapers[dir][2])
+        local file = math.random( wallpapers[dir][2])
         naughty.notify {
-            text = tostring(wallpapers[dir][1] .. '/' .. file .. '.jpg'),
+            text = tostring( wallpapers[dir][1] .. '/' .. file .. '.jpg'),
             appname = 'Wllpaper changer',
             title = sel_dir == 0 and 'Random wallpaper' or 'wallpaper from ' ..
                 wallpapers[dir][1]
@@ -120,7 +110,7 @@ local function random_wallpaper()
         change_wallpaper(dir, file)
     end
 end
-function return_img(po)
+local function return_img(po)
     local tab = {}
     for i, a in pairs(wallpapers) do
         if sel_dir == 0 or sel_dir == i then
@@ -148,7 +138,7 @@ local function update()
             middle + 1 or 1
 
     local t = return_img(po)
-
+SHIFT = po -1
     local sel = (max - pos < middle and items - (max - pos)) or
                     (pos < middle and pos) or middle
 
@@ -174,8 +164,6 @@ local function update()
     max = maxy
 end
 local function find_dir(t)
-    local m = 0
-    local ma = 0
     sel_dir = t == 0 and 0 or t + sel_dir
 
     if sel_dir < 0 then
@@ -187,13 +175,6 @@ local function find_dir(t)
 
         find_dir_text.text = ' '
     else
-        for i, a in pairs(wallpapers) do
-            if i == sel_dir then
-                ma = m + a[2]
-                break
-            end
-            m = m + a[2]
-        end
         find_dir_text.text = wallpapers[sel_dir][1]
 
     end
@@ -202,19 +183,18 @@ local function find_dir(t)
 end
 
 local function get_time(seconds)
-    local seconds = tonumber(seconds)
+    local sec = tonumber(seconds)
 
-    mins = string.format("%02.f", math.floor(seconds / 60));
-    secs = string.format("%02.f", math.floor(seconds - mins * 60));
+local    mins = string.format("%02.f", math.floor(sec / 60));
+   local  secs = string.format("%02.f", math.floor(sec - mins * 60));
     time_text.text = mins .. ':' .. secs .. '/' .. default_time_text
 
 end
 
 local function update_timer()
     get_time(timeout - clock)
-    clock_widget.value = (timeout - clock) / settings.default_timeout
+    clock_widget.value = (timeout - clock) / timeout
     if timeout - clock <= 0 then
-        timeout = settings.default_timeout
         clock = 0
         random_wallpaper()
     end
@@ -275,52 +255,54 @@ function public.hide()
 
 end
 function public.show()
-    items = math.floor(mouse.screen.geometry.width / (settings.wallpaper_width / item_num))
-    middle = math.ceil(items / 2)
-    wallpapers_wibox.visible = true
-    wallpapers_wibox.y = 0
-    wallpapers_wibox.x = mouse.screen.geometry.x
-    wallpapers_wibox.width = mouse.screen.geometry.width
-    gbbe = awful.keygrabber.run(function(_, key, event)
-        if event == "release" then return end
-        if key == 'Left' then
-            pos = pos - 1 > 0 and pos - 1 or 1
-            update()
-        elseif key == 'Right' then
-            pos = pos + 1 <= max and pos + 1 or pos
-            update()
-        elseif key == 'Up' then
-            find_dir(-1)
+	items = math.floor(mouse.screen.geometry.width / (settings.wallpaper_width / item_num))
+	middle = math.ceil(items / 2)
+	wallpapers_wibox.visible = true
+	wallpapers_wibox.y = 0
+	wallpapers_wibox.x = mouse.screen.geometry.x
+	wallpapers_wibox.width = mouse.screen.geometry.width
+	gbbe = awful.keygrabber.run(function(_, key, event)
+		if event == "release" then return end
+		if key == 'Left' then
+			pos = pos - 1 > 0 and pos - 1 or 1
+			update()
+		elseif key == 'Right' then
+			pos = pos + 1 <= max and pos + 1 or pos
+			update()
+		elseif key == 'Up' then
+			find_dir(-1)
 
-        elseif key == 'Down' then
-            find_dir(1)
-        elseif key == 'r' then
-            public.stop()
-            timeout = settings.default_timeout
-            clock = 0
-            public.start()
-        elseif key == 's' then
-            public.stop()
+		elseif key == 'Down' then
+			find_dir(1)
+		elseif key == 'r' then
+			public.stop()
+			clock = 0
+			public.start()
+		elseif key == 's' then
+			public.stop()
 
-        elseif key == 'p' then
-            public.start()
-        elseif key == 't' then
+		elseif key == 'p' then
+			public.start()
+		elseif key == 't' then
 
-            naughty.notify {text = tostring(timeout - clock)}
+			naughty.notify {text = tostring( math.floor(timeout - clock))}
 
-        elseif key == ' ' or key == 'Return' then
-            set_wal(pos)
-        elseif key == 'x' or key == 'Escape' then
-            public.hide()
+		elseif key == ' ' or key == 'Return' then
+			set_wal(pos)
+		elseif key == 'x' or key == 'Escape' then
+			public.hide()
+		elseif tonumber(key) then
+			clock = math.floor (timeout *((tonumber(key) ==0 and 0 or (1-tonumber(key)/10)) or 0))
 
-        end
-    end)
-    local h = 0
-    find_dir(0)
-    for i = 1, chosen_dir - 1 do h = h + wallpapers[i][2] end
+			update_timer()
+		end
+	end)
+	local h = 0
+	find_dir(0)
+	for i = 1, chosen_dir - 1 do h = h + wallpapers[i][2] end
 
-    pos = h + chosen_file
-    update()
+	pos = h + chosen_file
+	update()
 end
 function public.start()
 
@@ -346,9 +328,9 @@ wallpaper_layout:get_children()[sel_box].bg = item_active
     end
 end)
 awesome.connect_signal('exit', function()
-    local e = timeout - clock
+    local e =  clock
     local stat = 'false'
-    if e <= 0 then e = settings.default_timeout end
+    if e >= timeout then e = 0 end
 if state then
 stat = 'true'
 end
@@ -360,7 +342,7 @@ end
 end)
 local he = {}
 local dir = {}
-function get_wallpaers()
+local function get_wallpaers()
 
 local be = require('config.wallpapers')
 if be then
@@ -369,7 +351,7 @@ end
 
 end
 
-function get_wallpaer()
+local function get_wallpaer()
 
 local be = require('config.wallpaper')
 if be then
@@ -377,7 +359,7 @@ if be then
 end
 
 end
-function get_configs()
+local function get_configs()
 	pcall(get_wallpaers)
 	pcall(get_wallpaer)
 	if #he > 0 then
@@ -407,6 +389,21 @@ gears.timer.start_new(0.2, function()
 
         im.forced_width = settings.wallpaper_width / item_num
 
+	im:connect_signal("button::press", function(_,_,_,b)
+		if b == 1 then
+			set_wal(i+SHIFT)
+			pos  =i+SHIFT
+			update()
+			elseif b ==4 then
+			pos = pos + 1 <= max and pos + 1 or pos
+
+				update()
+			elseif b ==5 then
+			pos = pos - 1 > 0 and pos - 1 or 1
+				update()
+
+		end
+	end)
         wallpaper_layout:add(im)
     end
 
@@ -423,16 +420,17 @@ for i = 1, d - 1 do h = h + wallpapers[i][2] end
 if d and f then change_wallpaper(d, f) end
 if t > 0 then
 
-    timeout = t
+    clock = t
 
+clock_widget.value = t / timeout
 else
 
-    timeout = settings.default_timeout
+    clock = 0
+clock_widget.value = 0
 
 end
 
-get_time(timeout - clock)
-clock_widget.value = t / settings.default_timeout
+get_time(timeout - t)
 
 if state == true then
     clock_widget.color = tcolor.get_color(5, 'w')
@@ -446,7 +444,10 @@ end
 end
 else
 
-        tcolor.change_colors(1, 1)
+clock_widget.value = 1
+
+get_time(timeout)
+tcolor.change_colors(1, 1)
 
 end
 
