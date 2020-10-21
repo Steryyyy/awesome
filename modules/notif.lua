@@ -24,6 +24,13 @@ local list = wibox {
 
 }
 local last_not = wibox {width = 600, height = 100, ontop = true, fg = '#000000'}
+
+last_not:connect_signal("button::press", function(_,_,_,b)
+if b == 1 then
+last_not.visible = false
+end
+end)
+
 local function color_update()
 
     last_not.bg = tcolor.get_color(2, 'w')

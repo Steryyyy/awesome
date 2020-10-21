@@ -3,6 +3,7 @@ return {
 	terminal_get = {
 		instance ='dropdown-terminal',
 	},
+
 	widgets = {
 		internet = {
 			interface = "enp9s0",
@@ -26,13 +27,22 @@ return {
 	wallpaper = {
 		items = 9 ,
 		wallpaper_width = 2560,
-		default_timeout = 60*5,
+		default_timeout = 60*10,
 		wallpaper_command = "xwallpaper --zoom "
 	},
 	exit_screen = {
 		easter_egg = true,
 		insults = true,
-		cam = "/dev/video0"
+		cam = "/dev/video0",
+		op_margin =150,
+		op_height = 100,
+		op_font_size = 40,
+		username_width = 650,
+		username_font = nil,
+		username_font_size = 30,
+		username_font_size_min = 15,
+		clock_font = nil,
+		goodbye_margin = 75,
 	},
 
 	volume_con = {

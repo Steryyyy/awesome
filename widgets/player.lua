@@ -22,7 +22,7 @@ local get_spotify = [[
 
 ]]
 local get_cmus = [[
-    cmus-remote -Q | awk '/(status|file)/ {{gsub("^.*\\/","")}  a=a" "$0} END {{$0=a} print $2"|"$3"|"}'
+    cmus-remote -Q | awk '/(status|file)/ {{gsub("^.*\\/","")}  a=a" "$0} END {{$0=a} {$1=""}{$2="|"$2"|"}{$NF=$NF"|"} print $0}'
 
 ]]
 
@@ -34,10 +34,9 @@ widget_state.font=beautiful.font_icon
 
 local widget_prev = wibox.widget.textbox(icon_prev)
 widget_prev.font=beautiful.font_icon
-
 local widget_next = wibox.widget.textbox(icon_next)
 widget_next.font=beautiful.font_icon
-local widget_song = wibox.widget.textbox('', false, '#000000')
+local widget_song = wibox.widget.textbox('')
 widget_song.font = beautiful.font_name ..' Bold ' .. (settings.player_font_size  or 12)
 local widget_spawn = wibox.widget.textbox(icon_spotify)
 widget_spawn.font =beautiful.font_icon
@@ -164,16 +163,15 @@ player.cmus_state = function()
     awful.spawn.easy_async_with_shell(get_cmus, function(out)
 
         local arr = gears.string.split(out, '|')
+	if #arr[2]  > 4  then
 
-        if arr[1] ~= 'cmus-remote: cmus is not running' and arr[1] ~=''  then
-
-            if arr[1] == 'playing' then
+            if string.find(arr[2],'playing') then
                 widget_state.text = icon_pause
             else
                 widget_state.text = icon_play
             end
-            if    arr[1] ~='stopped' then
-            player.trimsong(arr[2])
+            if    arr[2] ~='stopped' then
+            player.trimsong(arr[3])
 
             get_volume('C* Music Player')
             else
@@ -322,14 +320,19 @@ end)
 
 player.update = function() widget_volume.color = player.color[1] end
 
+local widget_spacer = wibox.widget.textbox()
+widget_spacer.forced_width = 10
 widget_volume.value = 1
 
 local songwidget = wibox.widget {
     {widget = widget_volume},
     {
+
         {widget = widget_prev},
         {widget = widget_state},
         {widget = widget_song},
+
+        {widget = widget_spacer},
         {widget = widget_next},
 
         layout = wibox.layout.fixed.horizontal
@@ -361,7 +364,7 @@ if ine then
 songname = songname:sub(1,ine-1)
 end
 
-    widget_song.text = songname
+   widget_song.text = songname
 
 end
 widget_spawn:connect_signal("button::press", function(_,_,_,b)

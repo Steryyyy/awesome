@@ -8,9 +8,15 @@ local tcolor = require('tools.colors')
 local settings = require('settings').exit_screen
 
 local password = 'awesomeWm'
-
-
-local icon_font = beautiful.font_icon_name ..'50'
+local op_margin = settings.op_margin or 150
+local op_height = settings.op_height or 100
+local op_font_size =settings.op_font_size or 40
+local username_width = settings.username_width or 650
+local username_font = settings.username_font or beautiful.font_name ..' '
+local username_font_size =  settings.username_font_size or 30
+local username_font_size_min = settings.username_font_size_min or 15
+local goodbye_margin = settings.goodbye_margin or 75
+local clock_font = settings.clock_font or beautiful.font_name ..' ' .. 50
 local poweroff_text_icon = ""
 local reboot_text_icon = ""
 local restart_awesome_icon = ""
@@ -32,6 +38,16 @@ local function check_password(pass)
 	return false
 end
 
+local min_width = screen[1].geometry.width
+for i=2,#screen do
+if screen[i].geometry.width < min_width then
+min_width = screen[i].geometry.width
+end
+end
+
+
+local icon_font = beautiful.font_icon_name ..' '.. op_font_size
+
 local function bgg(w, shape)
 	if shape == nil then shape = gears.shape.powerline end
 	return wibox.widget {
@@ -40,11 +56,11 @@ local function bgg(w, shape)
 				text = tostring(w),
 				font = icon_font,
 				widget = wibox.widget.textbox,
-				forced_height = 150
+				forced_height = op_height
 			},
 
-			left = 100,
-			right = 100,
+			left = op_margin,
+			right = op_margin,
 			widget = wibox.container.margin
 		},
 
@@ -52,23 +68,28 @@ local function bgg(w, shape)
 		widget = wibox.container.background
 	}
 end
+
+
+
+local prompt = wibox.widget.textbox('dwadwa')
 local username = os.getenv("USER") or 'Anon'
 local username_widget = wibox.widget.textbox(username)
-username_widget.font = beautiful.font_name ..' 50'
-username_widget.forced_width = 600
+username_widget.font =username_font.. username_font_size
+username_widget.forced_width = username_width
+
+prompt.font = username_font.. username_font_size
 local usericon = os.getenv('HOME')..'/.config/awesome/images/profile.jpg'
 local usericon_widget =wibox.widget.imagebox  (usericon)
-usericon_widget.forced_height  = 150
-local prompt = wibox.widget.textbox('dwadwa')
+usericon_widget.forced_height  = math.ceil(min_width/30)
 local function ss(w, s)
 	if s == nil then s = tshape.leftpowerline end
 	return wibox.widget {
 		{
 			w,
-			left = 200,
+			left = goodbye_margin,
 			top = 20,
 			bottom = 20,
-			right = 150,
+			right = goodbye_margin,
 			widget = wibox.container.margin
 		},
 
@@ -88,8 +109,8 @@ local goodbye_widget = wibox.widget {
 	layout = wibox.layout.align.horizontal
 
 }
-goodbye_widget:set_spacing(-125)
-prompt.font = beautiful.font_name ..' 40'
+goodbye_widget.forced_height = 150
+goodbye_widget:set_spacing(-90)
 
 local comm = {}
 
@@ -216,7 +237,7 @@ local sett = wibox.widget {
 	layout = wibox.layout.fixed.horizontal
 }
 local textclock = wibox.widget.textbox('')
-textclock.font = beautiful.font_name ..' 75'
+textclock.font = clock_font
 textclock.align = 'center'
 gears.timer {
 	timeout   = 60,
@@ -230,7 +251,7 @@ gears.timer {
 sett:add(wibox.widget {
 	textclock,
 	shape = tshape.leftstart,
-	forced_width = 505,
+	forced_width = math.ceil(min_width/6),
 	widget = wibox.container.background
 })
 
@@ -372,7 +393,7 @@ return  function ()
 				if check_password(pass) then
 
 					username_widget.text = username
-					username_widget.font = beautiful.font_name ..' 50'
+				username_widget.font = username_font .. username_font_size
 					usericon_widget.image = usericon
 					locked = false
 
@@ -385,7 +406,7 @@ return  function ()
 
 						prompt.text = "locked"
 
-						username_widget.font = beautiful.font_name ..' 50'
+				username_widget.font = username_font .. username_font_size
 						username_widget.text = username
 
 						usericon_widget.image = usericon
@@ -395,7 +416,7 @@ return  function ()
 							require('my.naughty').notify{text = tostring("Pweaws wait i wiww check passwowwd (´ω｀*)") , urgency ='uwu'}
 							gears.timer.start_new(3, function()
 
-								username_widget.font = beautiful.font_name ..' 17'
+				username_widget.font = username_font .. username_font_size_min
 								username_widget.text = "I awm wweawyy sowwyy but i cawnt teww yyou passwowwd (ToT) pwease use yyouw mwiwnwd to fiwnwd passwowwd （◞‸◟） "
 								require('my.naughty').notify{text = tostring("I awm wwewyy sowwyy i awm to excitewd to teww yyou sempai ≧ω≦ \n I wiww take pictuwe of yyou\n Yowu awe weawwyy hawndsome") , urgency ='uwu'}
 								take_picture()
@@ -409,7 +430,7 @@ return  function ()
 						take_picture()
 						if settings.insults then
 
-							username_widget.font = beautiful.font_name ..' 17'
+				username_widget.font = username_font .. username_font_size_min
 							username_widget.text = settings.insults and dictionary[math.random(#dictionary)]
 						end
 

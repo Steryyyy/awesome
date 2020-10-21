@@ -97,10 +97,26 @@ local function random_wallpaper()
 
     math.randomseed(os.time())
 
-    local dir =  math.random( #wallpapers)
+local filen = 0
+    for _,a in pairs(wallpapers) do
+filen = a[2] + filen
+end
+
+    local dir =  math.random( filen)
+local file = 0
+
+
+    for i,a in pairs(wallpapers) do
+if dir <= a[2] then
+	file = dir
+	dir = i
+break
+else
+	dir = dir - a[2]
+end
+    end
 
     if wallpapers[dir][2] then
-        local file = math.random( wallpapers[dir][2])
         naughty.notify {
             text = tostring( wallpapers[dir][1] .. '/' .. file .. '.jpg'),
             appname = 'Wllpaper changer',
@@ -418,19 +434,13 @@ for i = 1, d - 1 do h = h + wallpapers[i][2] end
 
 
 if d and f then change_wallpaper(d, f) end
-if t > 0 then
 
     clock = t
 
-clock_widget.value = t / timeout
-else
 
-    clock = 0
-clock_widget.value = 0
 
-end
-
-get_time(timeout - t)
+clock_widget.value = (timeout-clock) /timeout
+get_time(timeout - clock)
 
 if state == true then
     clock_widget.color = tcolor.get_color(5, 'w')

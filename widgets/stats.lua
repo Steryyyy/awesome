@@ -47,8 +47,8 @@ end
 	if mem[1] then
 	local mem_tot = string.match(mem[1],'%d+')
 
-	local mem_use = string.match(mem[7],'%d+')
-	mem_pr.text = math.floor(mem_use*100/mem_tot+0.5) ..'%'
+	local mem_use =mem_tot -string.match(mem[2],'%d+') - string.match(mem[4],'%d+') - string.match(mem[5],'%d+')
+	mem_pr.text = math.floor((mem_use*100/mem_tot)+0.5) ..'%'
 end
 end
  c.timer {
