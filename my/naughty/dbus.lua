@@ -2,9 +2,9 @@ local pairs = pairs
 local type = type
 local string = string
 local capi = {awesome = awesome}
-local gsurface = require("my.gears.surface")
+local gsurface = require("gears.surface")
 
-local protected_call = require("my.gears.protected_call")
+local protected_call = require("gears.protected_call")
 local lgi = require("lgi")
 local cairo, Gio, GLib, GObject = lgi.cairo, lgi.Gio, lgi.GLib, lgi.GObject
 
@@ -195,7 +195,7 @@ end
 function notif_methods.GetServerInformation(_, _, _, _, _, invocation)
 
     invocation:return_value(GLib.Variant("(ssss)", {
-        "naughty", "my.awesome", capi.awesome.version, "1.2"
+        "naughty", "awesome", capi.awesome.version, "1.2"
     }))
 end
 

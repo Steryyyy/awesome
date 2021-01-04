@@ -1,4 +1,4 @@
-local beautiful = require("my.beautiful")
+local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 
 local ret = {}

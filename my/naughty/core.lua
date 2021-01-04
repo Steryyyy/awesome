@@ -1,9 +1,9 @@
 local capi = {screen = screen}
-local gdebug = require("my.gears.debug")
-local screen = require("my.awful.screen")
-local gtable = require("my.gears.table")
-local gobject = require("my.gears.object")
-local gsurface = require("my.gears.surface")
+local gdebug = require("gears.debug")
+local screen = require("awful.screen")
+local gtable = require("gears.table")
+local gobject = require("gears.object")
+local gsurface = require("gears.surface")
 
 local naughty = {}
 

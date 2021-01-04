@@ -1,6 +1,6 @@
 
 local naughty = require("my.naughty.core")
-local gdebug = require("my.gears.debug")
+local gdebug = require("gears.debug")
 local capi = {awesome = awesome, screen = screen}
 if dbus then
     naughty.dbus = require("my.naughty.dbus")

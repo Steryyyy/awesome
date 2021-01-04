@@ -1,11 +1,11 @@
-local wibox = require("my.wibox")
+local wibox = require("wibox")
 local settings = require('settings').widgets.battery
-local gears = require("my.gears")
+local gears = require("gears")
 
-local awful = require("my.awful")
+local awful = require("awful")
 local naughty = require("my.naughty")
 
-local beautiful = require("my.beautiful")
+local beautiful = require("beautiful")
 local battery = {}
 
 battery.colors = {'#8B4513'}
@@ -108,8 +108,27 @@ gears.timer {
 function battery.update() update() end
 
 function battery.notify()
-noti = true
-update()
+if settings then
+	noti = true
+
+ naughty.notify {
+        appname = 'Battery widget',
+        icon = battery_icon.text,
+        title = 'Battery not supported',
+        text = "There is not battery in configuration",
+        urgency = 'hide'
+    }
+	update()
+else
+
+ naughty.notify {
+        appname = 'Battery widget',
+        icon = battery_icon.text,
+        title = 'Battery not supported',
+        text = "There is not battery in configuration",
+        urgency = 'hide'
+    }
+end
 end
 
 

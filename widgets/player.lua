@@ -1,10 +1,10 @@
-local awful = require("my.awful")
+local awful = require("awful")
 
 -- Widget and layout library
-local wibox = require("my.wibox")
-local gears = require("my.gears")
+local wibox = require("wibox")
+local gears = require("gears")
 
-local beautiful = require("my.beautiful")
+local beautiful = require("beautiful")
 local settings = require('settings').widgets.player
 local max_song_title = settings.max_song_title or 60
 local icon_play = ' '
@@ -37,7 +37,7 @@ widget_prev.font=beautiful.font_icon
 local widget_next = wibox.widget.textbox(icon_next)
 widget_next.font=beautiful.font_icon
 local widget_song = wibox.widget.textbox('')
-widget_song.font = beautiful.font_name ..' Bold ' .. (settings.player_font_size  or 12)
+--widget_song.font = (beautiful.font_name or " ") ..' Bold ' .. (settings.player_font_size  or 12)
 local widget_spawn = wibox.widget.textbox(icon_spotify)
 widget_spawn.font =beautiful.font_icon
 
@@ -73,11 +73,14 @@ player.change = function()
     if player.selected == 'spotify' then
         player.selected = 'cmus'
 
+    --[[
     elseif player.selected == "musicpv" then
         player.selected = 'spotify'
 	else
-
-        player.selected = 'musicpv'
+    --]]
+else
+        player.selected = 'spotify'
+        -- player.selected = 'musicpv'
     end
     player.hidebuton(false)
 
@@ -127,6 +130,8 @@ if player.selected ~= "musicpv" then
 
 	awful.spawn.with_shell('pacmd set-sink-input-mute ' .. player.id ..
                                    ' ' .. tostring(muted))
+
+widget_volume.color = muted and '#ff0000' or player.color[1]
 	   else
 
 last_vol = muted and player.volume or last_vol

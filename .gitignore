@@ -1,5 +1,7 @@
 back/
 config/
-images/
+images/thumbnail
+images/album.png
+images/profile.jpg
 tools/colors/[^i]*.lua
-liblua_pam.so
+settings.lua

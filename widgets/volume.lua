@@ -1,4 +1,4 @@
-local wibox = require("my.wibox")
+local wibox = require("wibox")
 
 local volume = {}
 

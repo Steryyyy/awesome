@@ -1,7 +1,7 @@
-local a = require("my.wibox")
-local c = require("my.gears")
+local a = require("wibox")
+local c = require("gears")
 
-local beautiful = require("my.beautiful")
+local beautiful = require("beautiful")
 local d = {precentage = a.widget.textbox('')}
 local cpu_pr = a.widget.textbox('')
 

@@ -1,26 +1,20 @@
 pcall(require, "luarocks.loader")
 
-local gears = require("my.gears")
-local awful = require("my.awful")
+local gears = require("gears")
+local awful = require("awful")
+local wibox = require("wibox")
 
-local wibox = require("my.wibox")
-
-local beautiful = require("my.beautiful")
+local beautiful = require("beautiful")
 
 local naughty = require("my.naughty")
 local settings = require('settings').rc
+require("awful.autofocus")
 
-beautiful.useless_gap = 5
-beautiful.notification_icon_size = 60
-
-beautiful.fg_normal = '#ffffff'
-beautiful.font_name = settings.font
-beautiful.font = beautiful.font_name .. ' Bold '.. settings.font_size
-beautiful.font_icon_name = settings.font_icon
-beautiful.font_icon = settings.font_icon .. settings.font_icon_size
+local home=  os.getenv("HOME")
+beautiful.init(home.."/.config/awesome/theme.lua")
 local tools = require('tools')
 local widgets = require("widgets")
-
+local exit = require('modules.exit_screen')
 naughty.connect_signal("request::display_error", function(message, startup)
     naughty.notification {
         urgency = "critical",
@@ -29,6 +23,8 @@ naughty.connect_signal("request::display_error", function(message, startup)
         message = message
     }
 end)
+
+
 
 tag.connect_signal("request::default_layouts", function()
     awful.layout.append_default_layouts({
@@ -39,13 +35,13 @@ tag.connect_signal("request::default_layouts", function()
     })
 end)
 local widget_spacing = -12
-function Power(wi, shape, typ)
-    if not typ then typ = 'w' end
+function Power(wi, shape, col)
+    if not col then col = '#ff0000' end
     if not shape then shape = tools.shapes.leftpowerline end
 
     local background = wibox.container.background(
-                           wibox.container.margin(wi, 20, 15), '', shape)
-
+                           wibox.container.margin(wi, 20, 15), col, shape)
+background.fg = "#000000"
     return background
 end
 
@@ -73,16 +69,25 @@ local wwi = wibox.widget {
     Power(widgets.player.widget),
     Power(widgets.stats.cpu),
     Power(widgets.stats.mem),
-    Power(widgets.battery.widget),
+
+    Power(widgets.volume.volume ),
     Power(wibox.widget {
         widgets.net,
         right = 10,
         widget = wibox.container.margin
     }),
-    Power(widgets.volume.volume, gears.shape.rectangular_tag),
+
+
     spacing = widget_spacing
 
 }
+if require('settings').widgets.battery then
+wwi:add(Power(widgets.battery.widget,gears.shape.rectangular_tag))
+else
+ wwi:get_children()[#wwi:get_children()].shape = gears.shape.rectangular_tag
+
+end
+
 local function getcolor()
     coron.bg = tools.color.get_color(4, 'tg')
     widgets.battery.colors[1] = tools.color.get_color(5, 'w')
@@ -91,7 +96,11 @@ local function getcolor()
     widgets.player.color[1] = tools.color.get_color(5, 'w')
     widgets.battery.update()
     widgets.player.update()
-    widgets.taglist.update()
+    for s in screen do
+	    if s.tag_widget then
+	    s.tag_widget.update()
+	    end
+    end
     clock.bg = tools.color.get_color(1, 'tg')
     microphone.bg = tools.color.get_color(3, 'tg')
     local ww = wwi:get_children()
@@ -104,14 +113,46 @@ local function getcolor()
 
     coron.bg = tools.color.get_color(2, 'tg')
     for _, c in pairs(client.get()) do
-        if c == client.focus then
-            c.border_color = beautiful.border_color_active
-        else
-            c.border_color = '#000000'
-        end
+	    if c == client.focus then
+		    c.border_color = beautiful.border_color_active
+		    if c.titlebars_enabled then
+			 -- awful.titlebar(c,"top").widget.bg = beautiful.border_color_active
+			 -- awful.titlebar(c).widget.size = 10
+		    end
+	    else
+		    c.border_color = '#000000'
+
+		    if c.titlebars_enabled then
+			 -- awful.titlebar(c,"top").widget.bg = beautiful.border_color_active
+                         --[[
+			    awful.titlebar(c).bg_normal = beautiful.border_color_active
+			 awful.titlebar(c).bg_focus = beautiful.border_color_active
+                         --]]
+		    end
+	    end
     end
 
 end
+
+local tagnames = {"", "", "", "", "", 'hidden'}
+awesome.connect_signal('color_change', function() getcolor() end)
+local function add_screen(s)
+
+awful.tag(tagnames,s,awful.layout.layouts[1])
+for _,a in pairs(s.tags)do
+	a:set_gap(beautiful.useless_gap)
+end
+   s.bottom = awful.wibox {
+        position ="bottom",
+	   screen = s,
+        height = 20,
+        visible = true,
+
+        bg = '#00000000',
+        fg = '#000000'
+    }
+  s.bottom:struts({bottom = 20})
+ s.tag_widget = widgets.taglist(s)
 
 local bottom_widget = wibox.widget {
 
@@ -121,7 +162,7 @@ local bottom_widget = wibox.widget {
         layout = wibox.layout.fixed.horizontal,
         clock,
 
-        widgets.taglist,
+        s.tag_widget,
         microphone,
         coron,
         spacing = widget_spacing
@@ -132,27 +173,12 @@ local bottom_widget = wibox.widget {
     wwi
 
 }
-local tagnames = {"", "", "", "", "", 'hidden'}
-awesome.connect_signal('color_change', function() getcolor() end)
-screen.connect_signal("request::desktop_decoration", function(s)
-
-    awful.tag(tagnames, s, awful.layout.layouts[1])
-
-   s.wiboxes = {}
-   s.bottom = wibox {
-        y = s.geometry.height - 20 + s.geometry.y,
-        screen = s,
-        height = 20,
-        width = s.geometry.width,
-        x = s.geometry.x,
-        visible = true,
-
-        bg = '#00000000',
-        fg = '#000000'
-    }
-  s.bottom:struts({bottom = 20})
-
     s.bottom:set_widget(bottom_widget)
-end)
 
+exit.add_screen(s)
+end
+
+screen.connect_signal("request::desktop_decoration", function(s)
+add_screen(s)
+end)
 require('modules.init')

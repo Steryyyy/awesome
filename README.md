@@ -1,8 +1,114 @@
 
 
-<img src="https://github.com/Steryyyy/awesome/blob/master/screenshots/alll.jpg" width="100%">
+<!-- <img src="https://github.com/Steryyyy/awesome/blob/master/screenshots/alll.jpg" width="100%"> -->
+
+<!-- vim-markdown-toc GitLab -->
+
+* [Configuration file structure](#configuration-file-structure)
+	* [modules](#modules)
+	* [widgets](#widgets)
+	* [tools](#tools)
+* [Dependencies](#dependencies)
+	* [Required](#required)
+	* [Optional](#optional)
+* [Customization](#customization)
+	* [Changins settings.lua](#changins-settingslua)
+	* [Changing corona virus tracker](#changing-corona-virus-tracker)
+	* [Wallpaper module / wallpapers](#wallpaper-module-wallpapers)
+	* [Changing / adding colors](#changing-adding-colors)
+	* [Start menu](#start-menu)
+		* [Manually generated](#manually-generated)
+		* [Auto generated](#auto-generated)
+	* [Profile picture](#profile-picture)
+	* [Change terminal](#change-terminal)
+	* [Change clients "rules"](#change-clients-rules)
+	* [Change password](#change-password)
+	* [Further customisation](#further-customisation)
+* [Key bindings](#key-bindings)
+* [Gallery](#gallery)
+
+<!-- vim-markdown-toc -->
 
 
+# Configuration file structure
++ `settings.lua`
+
+Settings for widgets and modules
+
++ `rc.lua`
+
+Main configuration file awesomeWM reads that file.
+
++ `keybindings.lua`
+
+Default key bindings, mouse bindings, client key bindings
+
+## modules
+
+Wiboxes with custom key bindings and serve certain purpose.
++ `volcontrol.lua`
+
+Control volume and default sink and source.
+Volume widget use it.
++ `exit_screen.lua`
+
+Allow to power off, reboot, restart awesomeWM, exit awesomeWM and "lock" for lockscreen.
+
++ `startmenu.lua`
+
+Is used to spawn application and/or run command.
+
++ `wallpaper.lua`
+
+Change wallpaper manually or change when timer restarts.
+
++ `notif.lua`
+
+Allow to control notification.
+
+## widgets
+
++ `stats.lua`
+
+Memory and cpu usage percentage.
+
++ `volume.lua`
+
+Shows default sink and source.
+
++ `net.lua`
+
+Shows local ip address.
+
++ `battery.lua`
+
+Shows battery status.
+
++ `player.lua`
+
+Controls and shows player status.
+
++ `taglist.lua`
+
+Shows workspaces.
+
+## tools
+
++ `connect.lua`
+
+Rules for clients.
+
++ `terminal_dropdown.lua`
+
+Controls dropdown terminal.
+
++ `shapes.lua`
+
+Shapes used in wibar and modules
+
++ 'colors'
+
+Colors for modules, widgets, wibar
 
 
 # Dependencies
@@ -14,6 +120,7 @@
 | Name                                                | why?     |
 | ---                                                 | ---      |
 | [awesome-git](https://github.com/awesomeWM/awesome) | why not? |
+| lua5.3                                              |Some lines might be interpreted wrongly in previous lua versions |
 <!--[Cinnamon](https://nekopara.fandom.com/wiki/Cinnamon)| best catgirl| -->
 
 ## Optional
@@ -34,48 +141,37 @@
 | xwallpaper|for changing wallpaper|
 
 # Customization
+## Changins settings.lua
+Open default_settings.lua for refrence and edit settings.lua
 
+**Don't change**  `default_settings.lua`
+
+Example of settings.lua
+```lua
+local settings = require('default_settings')
+change(settings,{"widgets"},"battery", "/sys/class/power_supply/BAT1")
+
+change(settings,{ --[[Here give all arrays value is in --]] 'widgets','player'}, --[[ Here which value you want to change--]] "max_song_title",--[[ Here put value --]]70 )
+```
 ## Changing corona virus tracker
 
 Go to [https://github.com/sagarkarira/coronavirus-tracker-cli](https://github.com/sagarkarira/coronavirus-tracker-cli)
 to find your country name and code
+``` lua
 
-Go to ~/.config/awesome/settings.lua
-and edit country_name and country code
+change(settings,{"rc"},"country_name", --[[ Change to your country name --]]"USA")
+change(settings,{"rc"},"country_code", --[[Change to your country code --]]"usa")
 
-
-## Changind / adding colors
-
-Create file create.lua in folder tools/colors/
-
-File must contain something like that
-
-**Number of strings in arrays shouldn't be changed**
-```lua
-return {
---chosen_array
-{
--- chosencol
-{
-w = {"col1","col2","col3","col4","col5"},
-tg = {"col1","col2","col3","col4"},
-tgs ={"col1","col2","col3"},
-tks = {"col"},
-
-},
-}
-}
 ```
-Only way to change widgets colors is to change wallpaper through wallpaper module
 
-## Wallpaper module
+## Wallpaper module / wallpapers
 Run scripts/thumbnail.sh to create thumbnails and config/wallpapers.lua
 
 thumbnail.sh takes folders from ~/wallpaper
 Files must be named 1.jpg 2.jpg etc.
-and be in other folders
+and be in folder.
 
-Example
+Example of folder structure
 
 ``` sh
 
@@ -107,18 +203,96 @@ Example
     └── 9.jpg
 ```
 Go to ~/.config/awesome/settings.lua
-And change wallpaper_width to your wallpaper resolution
+``` lua
 
+change(settings,{"wallpaper"},"wallpaper_width", --[[ Change to your wallpaper width --]]1920)
+change(settings,{"wallpaper"},"wallpaper_height", --[[ Change to your wallpaper hight --]]1080)
+
+```
 Run thumbnail.sh to generate thumbnails for wallpaper module
 ```sh
 ~/.config/awesome/scripts/thumbnail.sh
 ```
+It will generate config file in ~/.config/awesome/config/wallpapers.lua
+
+Example of config file
+
+```lua
+return{{"awe",5},{"some",8},{"wm",9},}
+```
+**If number next to folder name isn't same as number of files in that folder simply change it.**
+
+## Changing / adding colors
+
+Create file create.lua in folder tools/colors/
+
+**Number of strings in arrays shouldn't be changed**
+
+Example
+```lua
+return {
+--chosen_array
+{
+-- chosencol
+{
+w = {"col1","col2","col3","col4","col5"},
+tg = {"col1","col2","col3","col4"},
+tgs ={"col1","col2","col3"},
+
+},
+}
+}
+```
+Better way is link files for each wallpaper folder
+
+Example
+
++ create.lua
+
+```lua
+return{
+require('tools.colors.awe'),
+require('tools.colors.some'),
+require('tools.colors.wm'),
+}
+```
+
++ awe.lua
+
+```lua
+return{
+{
+w={'#aa0d0a','#dc100c','#aa1812','#f73420','#21aa10'} ,
+tg={'#f9ba50','#c79540','#f9c864','#aa5717'} ,
+tgs={'#55a49e','#f9f6dd','#2adc14'} ,
+} ,
+{
+w={'#f9ebda','#ebe4db','#c8ddcc','#e1f9e3','#a1cedb'} ,
+tg={'#c7c5bf','#dbd9d5','#c7c4af','#f7f9f5'} ,
+tgs={'#a1cedb','#dc5d38','#aa5f32'} ,
+},
+}
+```
+Only way to change colors is to change wallpaper through wallpaper module
+
+Remember to link files in same order as their folder is in ~/.config/awesome/config/wallpapers.lua.
+
 ## Start menu
+### Manually generated
 Simply run
 ``` sh
 ~/.config/awesome/scripts/luamenu
 ```
+
 It should find desktop files from /usr/share/applications/
+and create config file in ~/.config/awesome/config/menu.lua
+### Auto generated
+
+Go to ~/.config/awesome/settings.lua
+```lua
+change(settings,{"start_menu"},"auto_menu", true)
+```
+And reload configuration
 
 ## Profile picture
 
@@ -126,7 +300,9 @@ add profile.jpg to ~/.config/awesome/images/
 ## Change terminal
 Go to ~/.config/awesome/settings.lua
 
-And change terminal
+```lua
+change(settings,{},"terminal",  "xterm")
+```
 
 
 ## Change clients "rules"
@@ -139,7 +315,7 @@ Go to ~/.config/awesome/modules/exit_screen.lua
 
 And change password
 
-## Farther customisation
+## Further customisation
 
 Do what you want.
 
@@ -148,167 +324,7 @@ Do what you want.
 # Key bindings
 Modkey is super key (windows key)
 
-Return enter
-## Default mode
-
-### Volume and player
-
-| key binding                 | Action                                            |
-| ---                         | ---                                               |
-| modkey + p                  | spawn player if is not running                    |
-| X86AudioPlay                | Player play/pause                                 |
-| XF86AudioPrev               | Player previous file                              |
-| XF86AudioNext               | Player next file                                  |
-| X86AudioStop                | Player next player (cmus to spotify or other way) |
-| X86AudioMute                | Mute sink input                                   |
-| X86AudioRaiseVolume         | Default sink volume up                            |
-| X86AudioLowerVolume         | Default sink volume down                          |
-| Shift + X86AudioMute        | Mute default source                               |
-| Shift + X86AudioRaiseVolume | Default source volume up                          |
-| Shift + X86AudioLowerVolume | Default source volume down                        |
-
-### Switching to modules
-
-| key binding | Action                                                                 |
-| ---         | ---                                                                    |
-| modkey + n  | Show notification module and switch to notification module keybindings |
-| modkey + x  | Show startmenu and switch to startmenu keybindings                     |
-| modkey + w  | Show wallpaper module and switch to wallpaper module keybindings       |
-| modkey + v  | Show volume module and switch to volume module keybindings             |
-
-### Notification
-
-| key binding | Action                                  |
-| ---         | ---                                     |
-| modkey + i  | Get network ip and mac                  |
-| modkey + b  | Battery state and update battery widget |
-
-
-
-### Screen keybindings
-| key binding          | Action                         |
-| ---                  | ---                            |
-| modkey + Control + k | Focus previous screen          |
-| modkey + Control + j | Focus next screen              |
-| modkey + k           | Move client to previous screen |
-| modkey + j           | Move client to next screen     |
-
-### Tag keybindings
-
-| key binding             | Action                    |
-| ---                     | ---                       |
-| modkey + Control + h    | Go to idden tag           |
-| modkey + 1..5           | Go to tag                 |
-| modkey + Control + 1..5 | Move client and go to tag |
-| modkey + Leftarrow      | Previous tag              |
-| modkey + Rightarrow     | Next tag                  |
-| modkey + h              | Shrink gap                |
-| modkey + l              | Increase gap              |
-| modkey + Space          | Next screen layout        |
-| modkey + Shift + Space  | Previous screen layout    |
-
-
-### Client keybindings
-| key binding                             | Action                                   |
-| ---                                     | ---                                      |
-| modkey + q                              | Toggle dropdown terminal visibility      |
-| modkey + Tab                            | Focus next client (for all screens)      |
-| modkey + Shift + Tab                    | Focus previous client (for all screens)  |
-| modkey + n                              | Client restore                           |
-| modkey + Shift + j                      | Swap client with next                    |
-| modkey + Shift + k                      | Swap client with previous                |
-| modkey + u                              | Go to urgent tab                         |
-| modkey + Control + Leftarrow            | Move client to previous tag and go there |
-| modkey + Control + Rightarrow           | Move client to next tag and go there     |
-| modkey + Shift + c                      | Kill selected client                     |
-| modkey + m                              | Client toggle maximize                   |
-| modkey + f                              | Client toggle fullscreen                 |
-| modkey + Shift + f                      | Client toggle float                      |
-| modkey + Numpad[1-9]                    | Move floating client to  site            |
-| modkey + Shift +  Numpad[1-9]           | Move floating client to site and resize  |
-| modkey + Control +  Numpad[1-9]         | Increase size client                     |
-| modkey + Shift + Control +  Numpad[1-9] | Decrees size client                      |
-
-
-
-##Module keybindings
-### Startmenu module
-
-
-| key binding         | Action                                                           |
-| ---                 | ---                                                              |
-| modkey + w          | Show wallpaper module and switch to wallpaper module keybindings |
-| modkey + v          | Show volume module and switch to volume module keybindings       |
-| modkey + e          | Show exitmenu and switch to exitmenu module keybindings          |
-| X86AudioMute        | Mute sink input                                                  |
-| X86AudioRaiseVolume | Default sink volume up                                           |
-| X86AudioLowerVolume | Default sink volume down                                         |
-| Uparrow             | Previous entry                                                   |
-| Downarrow           | Next entry                                                       |
-| Escape              | Hide startmenu and switch to default keybindings                 |
-| Return              | Exec entry hide startmenu and switch to previous keybindings     |
-
-### Volume module
-
-| key binding | Action                                                 |
-| ---         | ---                                                    |
-| Uparrow     | Previous entry                                         |
-| Downarrow   | Next entry                                             |
-| Leftarrow   | Entry volume -5                                        |
-| Rightarrow  | Entry volume  +5                                       |
-| c           | Change default sink/source or change input/output card |
-| K           | Kill input/source                                      |
-| r           | restart                                                |
-| Escape or x | Hide volume module and switch to previous keybindings  |
-
-### Wallpaper module
-
-| key binding     | Action                                                   |
-| ---             | ---                                                      |
-| Uparrow         | Previous wallpaper directory                             |
-| Downarrow       | Next wallpaper directory                                 |
-| Leftarrow       | Previous wallpaper                                       |
-| Rightarrow      | Next wallpaper                                           |
-| Space or Return | Change wallpaper                                         |
-| t               | Notify timer                                             |
-| r               | restart timer and start                                  |
-| s               | Pause timer                                              |
-| p               | Resume timer                                             |
-| Escape or x     | Hide wallpaper module and switch to previous keybindings |
-
-### Notification module
-
-
-| key binding     | Action                                                    |
-| ---             | ---                                                       |
-| t               | Toggle showing message                                    |
-| Space or Return | kill first notification                                   |
-| Escape or x     | Hide notication module and switch to previous keybindings |
-
-### Exitmenu module
-
-
-| key binding         | Action                                           |
-| ---                 | ---                                              |
-| Leftarrow           | Previous entry                                   |
-| Rightarrow          | Next entry                                       |
-| Escape or x q       | Hide exitmenu and switch to previous keybindings |
-| X86AudioMute        | Mute sink input                                  |
-| X86AudioRaiseVolume | Default sink volume up                           |
-| X86AudioLowerVolume | Default sink volume down                         |
-| Return              | Execute entry (lock and reload immediately )     |
-
-<!-- Mouse only work here. -->
-
-
-
-
-
-## Mouse binding
-### Default
-Courently only rightclick on wallpaper show exitmenu module
-### Exitmenu module
-Left click to start selected entry count down
+Modkey + F1 to cheat sheet
 
 
 # Gallery

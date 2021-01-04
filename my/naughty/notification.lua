@@ -1,12 +1,12 @@
 local capi = {screen = screen}
-local gobject = require("my.gears.object")
-local gtable = require("my.gears.table")
+local gobject = require("gears.object")
+local gtable = require("gears.table")
 
-local gfs = require("my.gears.filesystem")
+local gfs = require("gears.filesystem")
 
 local naughty = require("my.naughty.core")
 
-local pcommon = require("my.awful.permissions._common")
+local pcommon = require("awful.permissions._common")
 
 local notification = {}
 

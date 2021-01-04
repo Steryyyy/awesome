@@ -1,14 +1,15 @@
-local awful = require("my.awful")
+local awful = require("awful")
 local tcolor = require('tools.colors')
 local tshape = require('tools.shapes')
 local vole = require('modules.volcontrol')
 local show_exit  = require('modules.exit_screen')
 local wallpaper = require('modules.wallpaper')
-local wibox = require("my.wibox")
-local gears = require("my.gears")
+local wibox = require("wibox")
+local gears = require("gears")
 local settings = require('settings').start_menu
 local notd = require('modules.notif')
-local beautiful = require("my.beautiful")
+local beautiful = require("beautiful")
+local my_align = require('my.align')
 local user = os.getenv('USER')
 local starmenu = wibox {
 	width = settings.width > 300 and settings.width or 490,
@@ -24,7 +25,8 @@ local colors = {'#ff0000', '#ffff00'}
 local selcolor = '#ffffff'
 local unselect = '#000000'
 local prompt = settings.prompt or 'Search'
-
+local keys = require('keybindings').startmenu_keys
+local hotkeys_popup = require("my.hotkeys_popup")
 local search_str =''
 local last = ''
 local menu_items = {}
@@ -59,7 +61,7 @@ local user_widget = wibox.widget {
 	wibox.container.margin(distro_name, 25, 20, 5, 5), '',
 	tshape.taskendleft),
 
-	layout = wibox.layout.align.horizontal
+	layout = my_align.horizontal
 
 }
 user_widget:set_spacing(-20)
@@ -84,6 +86,7 @@ local function get_dirsto()
 	end
 end
 pcall(get_dirsto)
+get_dirsto = nil
 awful.spawn.easy_async_with_shell('uname -r', function(out)
 
 	kernel_version.text = out:gsub('%\n', '')
@@ -105,15 +108,20 @@ local function update_uptime ()
 		uptime_time.text =os.date('%d/%m/%Y ')..  h..':'..m
 	end
 end
-local function get_aa()
-	local be = require('config.menu')
-	if be then
+local function get_menu()
+	local be = nil
+	if settings.auto_menu then
+	be = require('scripts.luamenu')
+	else
+	be = require('config.menu')
+	end
+	if be and type(be) =="table" then
 
 		menu_items = be
 	end
 end
-pcall(get_aa)
-
+pcall(get_menu)
+get_menu = nil
 local filtered = menu_items
 local search_bg = wibox.container.background(
 wibox.container.margin(
@@ -364,7 +372,7 @@ function public.wallpaper_show()
 	wallpaper.show()
 end
 function public.exit_show()
-	show_exit()
+	show_exit.show()
 
 	public.hide()
 end
@@ -419,7 +427,7 @@ local function prompt_text_with_cursor()
 	search.markup = prompt .. text_start .. "<span background=\"" ..  colors[1] .. "\">" .. char .. "</span>" .. text_end .. spacer
 	return ret
 end
-menu:connect_signal("button::press", function(_,_,_,b)
+starmenu:connect_signal("button::press", function(_,_,_,b)
 if b == 4 then
 
 			pos = pos -1>0 and pos-1 or 1
@@ -443,53 +451,34 @@ function public.show()
 	gbb = awful.keygrabber.run(function(mod, key, event)
 		if event == "release" then return end
 
-		if mod[1] == 'Mod4' then
-			if key == 'w' then
+		local ind = 0
+		key = (key == " " and "space") or key
+
+		ind = require('functions').compare_key(keys,key,mod)
+		if ind ~=0 then
+
+			local opperation = keys[ind][4]
+			if opperation == 'wallpaper_show' then
 				public.wallpaper_show()
-			elseif key == 'v' then
+			elseif opperation =='volume_show' then
 				public.volume_show()
-			elseif key == 'e' then
+			elseif opperation =='exit_show' then
 				public.exit_show()
+			elseif opperation =='prev_entry' then
+				pos = pos -1>0 and pos-1 or 1
+				update()
+			elseif opperation =='next_entry' then
+				pos = pos +1
+				update()
+			elseif opperation =='exec' then
+				run_program(pos-1)
+			elseif opperation =='quit'then
+				public.hide()
+			elseif opperation =='keys' then
+				hotkeys_popup.show_help("startmenu")
 			end
-			return
-		end
-		if key == 'XF86AudioMute' then
-			public.volume_mute()
-		elseif key == 'XF86AudioRaiseVolume' then
-			public.volume_up()
-		elseif key == 'XF86AudioLowerVolume' then
-			public.volume_down()
-		end
 
-		if key == 'Up' then
-			pos = pos -1>0 and pos-1 or 1
-			update()
-
-		elseif key == 'Down' then
-			pos = pos +1
-
-
-			update()
-
-
-		elseif key == 'Right' then
-
-			cur_pos = cur_pos +1
-			prompt_text_with_cursor()
-		elseif key == 'Left' then
-
-
-			cur_pos = cur_pos -1
-			prompt_text_with_cursor()
-
-		elseif key == 'Escape' then
-
-			public.hide()
-		elseif key == 'Return' then
-
-			run_program(pos-1)
 		else
-
 			if key:wlen() == 1 then
 
 				key = key:lower()
@@ -509,7 +498,6 @@ function public.show()
 
 
 			end
-
 			add(search_str)
 
 
