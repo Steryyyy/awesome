@@ -22,7 +22,6 @@ local function totag(i)
 end
 
 function to_hidden() totag(6) end
-
 local function move_tag(d)
 	local screen = awful.screen.focused()
 	local tag = screen.selected_tag
@@ -93,6 +92,12 @@ local function client_idx(i)
 
 end
 
+local log = false
+client.connect_signal("manage", function(c)
+if log  then
+require('my.naughty').notify{text = tostring((c.class or "undefined" ) .. " " ..(c.name or "undefined")), urgency = "hide"}
+end
+end)
 local functions = {
 menu_show = menu.show,
 menu_volume_show = menu.volume_show,
@@ -113,7 +118,7 @@ player_play = player.play,
 player_mute = player.mute,
 player_dec = player.dec,
 player_inc = player.inc,
-
+log_client = function() log = not log end,
 dropdown_toggle = dropdown.toggle,
 
 battery_notify = battery.notify,

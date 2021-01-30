@@ -6,26 +6,20 @@ return {
 	},
 	terminal = 'urxvt',
 	widgets = {
-		internet = {
-			interface = "enp9s0",
-
-
-		},
 		player = {
 			max_song_title = 80,
-			player_font_size = 11,
+			player_font = "Source Han Sans JP Bold 12",
 		},
-		--comment battery if you dont have one
-		--battery = "/sys/class/power_supply/BAT1",
-		battery = nil,
+	},
+	connect = {
+	browser = "firefox",
 	},
 	rc = {
 		country_name = 'USA',
 		country_code = 'usa',
-		font =  'Source Han Sans JP',
-		font_icon = 'Font Awesome 5 Free Solid  ',
-		font_size = 14,
-		font_icon_size = 11,
+		font =  'Source Han Sans JP Bold 14',
+		font_icon = 'Font Awesome 5 Free Solid 10 ',
+		font_coron = "Source Han Sans JP Bold 10",
 	},
 	wallpaper = {
 
@@ -36,17 +30,17 @@ return {
 		wallpaper_command = "xwallpaper --zoom "
 	},
 	exit_screen = {
-		insults = true,
+		insults = false,
 		cam = "/dev/video0",
 		op_margin =75, --75
 		op_height = 100,
-		op_font_size = 30,
+		op_font = "Font Awesome 5 Free Solid 30",
 		username_width = 400,
 		clock_width = 350,
-		username_font = nil,
+		username_font = "Source Han Sans JP  ",
 		username_font_size = 30,
 		username_font_size_min = 10,
-		clock_font = nil,
+		clock_font = "Source Han Sans JP  50",
 		goodbye_margin = 100,
 		icon_height = 100,
 	},
@@ -55,13 +49,17 @@ return {
 		-- 1 item = 70
 		items = 8,
 		width = 600,
-		height = 380+210,
+		height = 480+30+90,
+		font_icon = 'Font Awesome 5 Free Solid 10',
+		font_type =  'Source Han Sans JP Bold 13',
+		font_name =  'Source Han Sans JP Bold 12',
+		font_card =  'Source Han Sans JP Bold 10',
 	},
 	noti = {
 		width = 400,
 		height = 300,
-		max_size = 800,
-		nim_size = 200,
+		max_width = 800,
+		max_height = 400,
 
 	},
 	start_menu = {
@@ -73,8 +71,8 @@ return {
 
 	},
 	client = {
-	titlebars = false,
-	titlebars_shape = nil,
-	shape = nil,
+		titlebars = false,
+		titlebars_shape = nil,
+		shape = nil,
 	},
 }

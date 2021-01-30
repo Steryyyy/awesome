@@ -2,6 +2,7 @@ local awful = require("awful")
 local beautiful = require("beautiful")
 local get_term_dropdown = require('settings').terminal_dropdown_get
 local client_settings = require('settings').client
+local settings = require('settings').connect 
 local urgent = {}
 local floating_table = {
 	instance = {"copyq", "pinentry"},
@@ -33,7 +34,7 @@ local function set_default(c)
 	c:relative_move(0,0,0,0)
 end
 local function find_class(c)
-	if string.find( string.lower(c.class),'firefox') then
+	if string.find( string.lower(c.class),string.lower(settings.browser)) then
 		move_and_toggle(c, 2)
 		return true
 	elseif string.find(string.lower(c.class),"spotify") then
@@ -55,7 +56,6 @@ client.connect_signal("request::manage",function(c)
 	c:tags  {awesome.startup and c.first_tag or mouse.screen.selected_tag}
 	c.border_width = (c.fullscreen or c.sticky ) and 0 or 5
 	c.border_color = "#000000"
-	c.size_hints_honor = false
 	c.raise = false
 	c.minimized = false
 	c.maximized = false
@@ -73,6 +73,7 @@ client.connect_signal("manage", function(c)
 			return
 		end
 	end
+
 	if c.class == '' or c.class == nil then
 		move_and_toggle(c, 6)
 		c:connect_signal('property::class', function(c) find_class(c) end)
@@ -102,6 +103,8 @@ client.connect_signal("manage", function(c)
 	if c.first_tag and c.first_tag.index == mouse.screen.selected_tag.index  then
 		c:emit_signal('request::activate', "manage",{raise = true})
 	end
+
+	c.size_hints_honor = false
 	if awesome.startup and not c.size_hints.user_position and
 		not c.size_hints.program_position then
 		c:relative_move(0,0,0,0)
@@ -171,7 +174,8 @@ local top = awful.titlebar(c,{size = 20 , position = "top"})
         end)
     )
 
-top.widget = wibox.widget{{
+
+    top.widget = wibox.widget{{
 	    {
 		     { -- Left
             awful.titlebar.widget.iconwidget(c),

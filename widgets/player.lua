@@ -37,7 +37,7 @@ widget_prev.font=beautiful.font_icon
 local widget_next = wibox.widget.textbox(icon_next)
 widget_next.font=beautiful.font_icon
 local widget_song = wibox.widget.textbox('')
---widget_song.font = (beautiful.font_name or " ") ..' Bold ' .. (settings.player_font_size  or 12)
+widget_song.font = (settings.player_font or beautiful.font )  
 local widget_spawn = wibox.widget.textbox(icon_spotify)
 widget_spawn.font =beautiful.font_icon
 

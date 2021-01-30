@@ -1,24 +1,25 @@
+local password = 'awesomeWm'
+
+
 local awful = require("awful")
 local gears = require("gears")
 local wibox = require("wibox")
 local tshape = require('tools.shapes')
-
 local beautiful = require("beautiful")
 local tcolor = require('tools.colors')
 local settings = require('settings').exit_screen
 local my_align = require('my.align')
-local password = 'awesomeWm'
 local icon_height = settings.icon_height or 100
 local op_margin = settings.op_margin or 150
 local op_height = settings.op_height or 100
-local op_font_size =settings.op_font_size or 40
 local username_width = settings.username_width or 650
 local clock_width = settings.clock_width or 400
-local username_font = settings.username_font or beautiful.font_name ..' '
+local username_font = settings.username_font or  "Source Han Sans JP"
+username_font = username_font .." "
 local username_font_size =  settings.username_font_size or 30
 local username_font_size_min = settings.username_font_size_min or 15
 local goodbye_margin = settings.goodbye_margin or 75
-local clock_font = settings.clock_font or beautiful.font_name ..' ' .. 50
+local clock_font = settings.clock_font or beautiful.font
 local poweroff_text_icon = ""
 local reboot_text_icon = ""
 local restart_awesome_icon = ""
@@ -95,8 +96,7 @@ end
 
 
 
-local icon_font = beautiful.font_icon_name ..' '.. op_font_size
-
+local icon_font = settings.op_font or beautiful.font_icon 
 local function bgg(w, shape)
 	if shape == nil then shape = gears.shape.powerline end
 	return wibox.widget {
@@ -172,7 +172,7 @@ table.insert(comm, bgg(reboot_text_icon))
 table.insert(comm, bgg(restart_awesome_icon))
 table.insert(comm, bgg(exit_text_icon))
 
-table.insert(comm, bgg(lock_text_icon, tshape.taskendleft))
+table.insert(comm, bgg(lock_text_icon, tshape.finish_right_powerline))
 
 local index = #comm
 local timeout = 3
@@ -280,7 +280,7 @@ gears.timer {
 
 sett:add(wibox.widget {
 	textclock,
-	shape = tshape.leftstart,
+	shape = tshape.start_right_powerline,
 	forced_width = clock_width,
 	widget = wibox.container.background
 })

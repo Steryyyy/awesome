@@ -46,11 +46,11 @@ local find_dir_text = wibox.widget.textbox('')
 
 find_dir_text.align = 'center'
 local find_dir_wal = wibox.container.background(find_dir_text, '',
-tshape.leftstart)
+tshape.start_right_powerline)
 find_dir_wal.forced_width = 175
 local text_dir_wal = wibox.container.background(
 wibox.container.margin(time_text, 20, 10, 0, 0), '',
-tshape.startn)
+tshape.start_left_powerline)
 
 
 local clock_widget = wibox.widget {
@@ -58,7 +58,7 @@ local clock_widget = wibox.widget {
 
 	forced_height = 10,
 	background_color = '#000000',
-	shape = tshape.taskend,
+	shape = tshape.double_trapeze,
 
 	widget = wibox.widget.progressbar
 }

@@ -194,8 +194,8 @@ local function create_page()
 	return ge
 end
 
-tabs[true] = create_tab('Cards', tshape.leftstart)
-tabs[false] = create_tab('Clients', tshape.taskendleft)
+tabs[true] = create_tab('Cards', tshape.start_right_powerline)
+tabs[false] = create_tab('Clients', tshape.finish_right_powerline)
 
 tab_layout:add(tabs[true])
 tab_layout:add(tabs[false])
@@ -377,7 +377,7 @@ local function widgets_create(tt,te,ind)
 					{       {
 						id = 'type',
 						text = get_typename(tt.type)..' '.. tt.id ,
-
+						font = settings.font_type,
 						widget = wibox.widget.textbox
 					},
 					left = 20,
@@ -393,7 +393,7 @@ local function widgets_create(tt,te,ind)
 						{
 							id = 'name',
 							text = tt.name,
-
+							font = settings.font_name,
 							widget = wibox.widget.textbox
 						},
 						left = 20,
@@ -413,7 +413,7 @@ local function widgets_create(tt,te,ind)
 							{
 								id = 'volume_text',
 								forced_width = 20,
-								font = beautiful.font_icon,
+								font = settings.font_icon,
 								text = icon,
 
 								widget = wibox.widget.textbox
@@ -445,7 +445,7 @@ local function widgets_create(tt,te,ind)
 						left = 10,
 						widget = wibox.container.margin
 					},
-					shape = tshape.startn,
+					shape = tshape.start_left_powerline,
 					forced_width = 80,
 					bg = colors[3],
 					id = 'volume_bg',
@@ -460,6 +460,7 @@ local function widgets_create(tt,te,ind)
 					id = 'card',
 					align = 'center',
 					text = card,
+					font = settings.font_card,
 
 					widget = wibox.widget.textbox
 				},

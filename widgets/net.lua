@@ -1,6 +1,5 @@
 local wibox = require("wibox")
 local gears = require("gears")
-local settings = require('settings').widgets.internet
 local awful = require("awful")
 local beautiful = require('beautiful')
 local naughty = require("my.naughty")
@@ -8,7 +7,6 @@ local naughty = require("my.naughty")
 local widget = wibox.widget.textbox("睊")
 widget.font = beautiful.font_icon
 
-local interfaces =   settings.interface  or {"enp9s0"}
 local msg = "Wired network is disconnected"
 
 local mac = "N/A"
@@ -29,37 +27,45 @@ local function net_update()
 	mac = "N/A"
 	inet = "N/A"
 	msg = ""
-	local was = false
-	for i,interface in pairs(interfaces) do
-		awful.spawn.easy_async_with_shell("ip addr show " .. interface ..
-		[[| awk '/(inet |link\/ether)/ {print $2}' ]],
+local has = false
+		awful.spawn.easy_async_with_shell("ip addr | awk -f ~/.config/awesome/scripts/ip.awk",
 		function(out)
-			local a = gears.string.split(out, "\n")
-			a[2] = a[2] or ""
-			a[1] = a[1] or ""
-			inet = a[2] ~="" and a[2] or "N/A"
 
-			mac = a[1] ~="" and a[1] or "N/A"
-			msg =msg.. "┌[" .. interface .. "]\n" .. "├IP:  " .. inet .. "\n" ..
-			"└MAC: " .. mac .."\n"
+			for _,a in  ipairs( gears.string.split(out, "\n")) do
 
-			if not has then
-				if inet ~= "N/A" then
-					widget.text = ""
-					has = true
-				else
-					widget.text = "睊"
+			local array = gears.string.split(a, "|")
+			if #array > 1 then
+			local interface = array[1]
+			mac = array[2]
 
-				end
+			if  #array  >2  then
+			inet = array[3]
+			has = true
+			else
+				inet = "N/A"
 			end
-			if nott and i == #interfaces then
+			if msg ~="" then
+			msg = msg .."\n"
+			end
+
+			msg =msg.. "┌[" .. interface .. "]\n" .. "├IP:  " .. inet .. "\n" ..
+			"└MAC: " .. mac
+			end
+
+			end
+				if has then
+					widget.text = ""
+				else
+				widget.text = "睊"
+				end
+
+			if nott  then
 				nott = false
 				_notify()
 
 			end
 		end)
 
-	end
 end
 gears.timer {
     timeout   = 300,

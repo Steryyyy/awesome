@@ -209,7 +209,7 @@ iconbox.forced_width = 25
 notifbox_template.time = os.time()
 local w, h = wibox.widget.base.fit_widget(notifbox_template,
 {dpi = mouse.screen.dpi},
-notifbox_template, settings.max_size or 800, settings.min_size or 400)
+notifbox_template, settings.max_width or 800, settings.max_height or 400)
 last_not.height = h
 last_not.width = w
 

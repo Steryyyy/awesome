@@ -1,8 +1,8 @@
 
 
-<!-- <img src="https://github.com/Steryyyy/awesome/blob/master/screenshots/alll.jpg" width="100%"> -->
+<img src="https://github.com/Steryyyy/awesome/blob/master/screenshots/alll.jpg" width="100%">
 
-<!-- vim-markdown-toc GitLab -->
+<!-- vim-markdown-toc GFM -->
 
 * [Configuration file structure](#configuration-file-structure)
 	* [modules](#modules)
@@ -14,20 +14,21 @@
 * [Customization](#customization)
 	* [Changins settings.lua](#changins-settingslua)
 	* [Changing corona virus tracker](#changing-corona-virus-tracker)
-	* [Wallpaper module / wallpapers](#wallpaper-module-wallpapers)
-	* [Changing / adding colors](#changing-adding-colors)
 	* [Start menu](#start-menu)
 		* [Manually generated](#manually-generated)
 		* [Auto generated](#auto-generated)
+	* [Changes to settings.lua](#changes-to-settingslua)
+	* [Wallpaper module / wallpapers](#wallpaper-module--wallpapers)
+	* [Changing / adding colors](#changing--adding-colors)
 	* [Profile picture](#profile-picture)
-	* [Change terminal](#change-terminal)
 	* [Change clients "rules"](#change-clients-rules)
-	* [Change password](#change-password)
+	* [Change password/pam login](#change-passwordpam-login)
 	* [Further customisation](#further-customisation)
 * [Key bindings](#key-bindings)
 * [Gallery](#gallery)
 
 <!-- vim-markdown-toc -->
+
 
 
 # Configuration file structure
@@ -128,30 +129,29 @@ Colors for modules, widgets, wibar
 | Name                                                                 | why?                                                                          |
 | ---                                                                  | ---                                                                           |
 | [cmus](https://github.com/cmus/cmus)                                 | for player widget                                                             |
-| [Source Han Sans JP](https://github.com/adobe-fonts/source-han-sans) | if you want japanese characters |
-| [Font Awesome 5](https://fontawesome.com/)                           | for font icons ( has awesome in name so only works with awesomewm :))         |
+| [Source Han Sans JP](https://github.com/adobe-fonts/source-han-sans) | if you want japanese characters and default_settings font |
+| [Font Awesome 5](https://fontawesome.com/)                           | for font icons                                                       |
 | [Nerd font](https://www.nerdfonts.com/font-downloads)                | for font icons                                                                |
-| awk                                                                  | for volume module and widgets player, net, status and corona tracked          |
+| awk                                                                  | for volume module and widgets player, net, status and corona tracked,net widget          |
 | grep                                                                 | same as awk                                                                   |
 | pacmd and pulseaudio                                                 | volume module and player widget                                               |
 | sed                                                                  | same as grep                                                                  |
 | tr                                                                   | yes                                                                           |
-| urxvt                                                                | to dropdown terminal                                                          |
-| urxvd                                                                | to dropdown terminal run urxvtd before awesomewm in .xinitrc                  |
+| urxvt                                                                | for dropdown terminal                                                          |
+| urxvd                                                                | for dropdown terminal run urxvtd before awesomewm in .xinitrc                  |
 | xwallpaper|for changing wallpaper|
-
+|[pam-lua](https://github.com/devurandom/lua-pam)|pam authentication (user system password)  |
 # Customization
 ## Changins settings.lua
-Open default_settings.lua for refrence and edit settings.lua
+Use default_settings.lua for refrence and edit settings.lua
 
-**Don't change**  `default_settings.lua`
+**Don't change**  `default_settings.lua` it will be change every time you pull
 
 Example of settings.lua
 ```lua
 local settings = require('default_settings')
-change(settings,{"widgets"},"battery", "/sys/class/power_supply/BAT1")
 
-change(settings,{ --[[Here give all arrays value is in --]] 'widgets','player'}, --[[ Here which value you want to change--]] "max_song_title",--[[ Here put value --]]70 )
+change(settings,{ --[[ Arrays the variable is in--]] 'widgets','player'}, --[[ Variable to change--]] "max_song_title",--[[ Desired value --]]70 )
 ```
 ## Changing corona virus tracker
 
@@ -162,8 +162,134 @@ to find your country name and code
 change(settings,{"rc"},"country_name", --[[ Change to your country name --]]"USA")
 change(settings,{"rc"},"country_code", --[[Change to your country code --]]"usa")
 
+--font for coron widget
+change(settings,{"rc"},"font_coron", "some font ")
 ```
 
+## Start menu
+### Manually generated
+Simply run
+``` sh
+~/.config/awesome/scripts/luamenu
+```
+
+It should find desktop files from /usr/share/applications/
+and create config file in ~/.config/awesome/config/menu.lua
+### Auto generated
+
+Go to ~/.config/awesome/settings.lua
+```lua
+change(settings,{"start_menu"},"auto_menu", true)
+```
+And reload configuration
+
+
+
+
+## Changes to settings.lua
+```lua
+
+-- Changes dropdown_terminal(Super + q to spawn)
+change(settings,{},"terminal_dropdown",  "some termina;")
+
+-- Changes terminal
+change(settings,{},"terminal",  "some terminal")
+
+change(settings,{"widgets"},"battery", --[[Change to yours path to battery.  --]]"some path")
+
+
+--Maximum number of characters player can show
+change(settings,{"widgets","player"},"max_song_title",90)
+
+-- Font for player
+change(settings,{"widgets","player"},"player_font", "some font ")
+
+
+change(settings,{"connect"},"browser", --[[Change to your browser.  --]]"some browser")
+
+
+-- Default font
+change(settings,{"rc"},"font", "some font ")
+--Default font for text icons
+change(settings,{"rc"},"font_icon", "some font ")
+
+
+--Maximum number of items
+change(settings,{"wallpaper"},"items", 10)
+--Time after wallpaper will change in seconds
+change(settings,{"wallpaper"},"default_timeout", 10)
+--Command to change wallpaper 
+change(settings,{"wallpaper"},"wallpaper_command",  "some command")
+
+
+-- Disable/enable insult after tipping wrong password
+change(settings,{"exit_screen"},"insult",  true)
+-- Path to camera to take picture after wrong password
+change(settings,{"exit_screen"},"cam",  "some path")
+-- Margin between Lock, Exit ect.
+change(settings,{"exit_screen"},"op_margin", 100)
+-- Height of Lock, Exit ect.
+change(settings,{"exit_screen"},"op_height", 100)
+-- Font  of Lock, Exit ect.
+change(settings,{"exit_screen"},"op_font", "some font")
+-- Width for username and user avatar
+change(settings,{"exit_screen"},"username_width", 400)
+
+--Don't specify font size use username_font_size and username_font_size_min 
+change(settings,{"exit_screen"},"username_font", "some font")
+--Default username font size
+change(settings,{"exit_screen"},"username_font_size",10)
+--Font size when insulting 
+change(settings,{"exit_screen"},"username_font_size_min",10)
+
+change(settings,{"exit_screen"},"clock_width", 400)
+
+change(settings,{"exit_screen"},"clock_font","some font")
+
+
+--Maximum number of items displayed at once
+change(settings,{"volume_con"},"items",10)
+--Volume module width
+change(settings,{"volume_con"},"width",100)
+--Volume module height set minimum (items*60+30)
+change(settings,{"volume_con"},"height",210)
+--Font for Input,Source ect. label
+change(settings,{"volume_con"},"font_type","some font")
+--Font for spiker icon
+change(settings,{"volume_con"},"font_icon","some font")
+--Font for name (client)
+change(settings,{"volume_con"},"font_name","some font")
+--Font Sink,Source name '#' means default
+change(settings,{"volume_con"},"font_card","some font")
+
+
+--Notification module width
+change(settings,{"notif"},"width",100)
+--Notification module height
+change(settings,{"notif"},"height",210)
+--Notification max width
+change(settings,{"notif"},"max_width",100)
+--Notification max height
+change(settings,{"notif"},"max_height",210)
+
+
+
+--Startmenu module width
+change(settings,{"start_menu"},"width",100)
+--Startmenu module height
+change(settings,{"start_menu"},"height",210)
+--Maximum number of entries displayed at once
+change(settings,{"Startmenu"},"items",10)
+--Prompt text
+change(settings,{"Startmenu"},"prompt","some text")
+
+--Disable/enable titlebars for client
+change(settings,{"clients"},"titlebars",false)
+--Shape of client when titlebars are enabled
+change(settings,{"clients"},"titlebars_shape",function() end)
+--Shape of client when titlebars are disabled
+change(settings,{"clients"},"titlebars_shape",function() end)
+```
 ## Wallpaper module / wallpapers
 Run scripts/thumbnail.sh to create thumbnails and config/wallpapers.lua
 
@@ -277,43 +403,29 @@ Only way to change colors is to change wallpaper through wallpaper module
 
 Remember to link files in same order as their folder is in ~/.config/awesome/config/wallpapers.lua.
 
-## Start menu
-### Manually generated
-Simply run
-``` sh
-~/.config/awesome/scripts/luamenu
-```
-
-It should find desktop files from /usr/share/applications/
-and create config file in ~/.config/awesome/config/menu.lua
-### Auto generated
-
-Go to ~/.config/awesome/settings.lua
-```lua
-change(settings,{"start_menu"},"auto_menu", true)
-```
-And reload configuration
 
 ## Profile picture
 
 add profile.jpg to ~/.config/awesome/images/
-## Change terminal
-Go to ~/.config/awesome/settings.lua
-
-```lua
-change(settings,{},"terminal",  "xterm")
-```
-
 
 ## Change clients "rules"
 Go to ~/.config/awesome/tools/connect.lua
 
 And change find_class
 
-## Change password
+## Change password/pam login
 Go to ~/.config/awesome/modules/exit_screen.lua
-
 And change password
+
+
+Or install lua-pam for lua5.3
+```sh
+git clone https://github.com/devurandom/lua-pam --recursive
+cd lua-pam
+make LUA_VERSION=5.3
+cd pam.so ~/.config/awesome
+```
+If pam doesn't work or is not detected,  the text will be "Lock no pam" instead of "Lock"
 
 ## Further customisation
 

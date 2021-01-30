@@ -51,6 +51,7 @@ public.globals = {
 	{{modkey},"Right",{description="Move to next tag",group="Tag"},"tag_next"},
 	{{modkey,control},"Right",{description="Move client to next tag",group="Client"},"client_to_next"},
 	{{modkey,control},"Left",{description="Move client to previous tag",group="Client"},"client_to_prev"},
+	{{modkey},"s",{description="Log client",group="Client"},"log_client"},
 
 
 }

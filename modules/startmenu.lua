@@ -49,7 +49,7 @@ local user_widget = wibox.widget {
 			spacing = 10,
 			layout = wibox.layout.fixed.horizontal
 		}, 5, 20, 5, 5),
-		shape = tshape.leftstart,
+		shape = tshape.start_right_powerline,
 		widget = wibox.container.background
 
 	},
@@ -59,7 +59,7 @@ local user_widget = wibox.widget {
 	gears.shape.powerline),
 	wibox.container.background(
 	wibox.container.margin(distro_name, 25, 20, 5, 5), '',
-	tshape.taskendleft),
+	tshape.finish_right_powerline),
 
 	layout = my_align.horizontal
 
@@ -280,7 +280,7 @@ for i=1,maxitm do
 			left = 25,
 			widget = wibox.container.margin
 		},
-		shape = tshape.taskendleft,
+		shape = tshape.finish_right_powerline,
 		bg = '',
 
 		widget = wibox.container.background
@@ -288,7 +288,7 @@ for i=1,maxitm do
 	name.forced_width = starmenu.width + 10
 	local imbox = wibox.container.background(
 	wibox.container.margin(wibox.widget.imagebox(image), 5,
-	20, 5, 5), '', tshape.leftstart)
+	20, 5, 5), '', tshape.start_right_powerline)
 	imbox.forced_width = 50
 	local widget = wibox.widget {
 		{
