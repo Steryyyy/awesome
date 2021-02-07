@@ -6,7 +6,6 @@ local keys =  require('keybindings')
 
 local exit = require('modules.exit_screen')
 local net = require('widgets.net')
-local connect= require('tools.connect')
 local battery = require('widgets.battery')
 local dropdown = require('tools.terminal_dropdown')
 
@@ -98,6 +97,16 @@ if log  then
 require('my.naughty').notify{text = tostring((c.class or "undefined" ) .. " " ..(c.name or "undefined")), urgency = "hide"}
 end
 end)
+
+function to_urgent()
+for i,t in pairs(mouse.screen.tags) do
+if t.urgent  then
+t:view_only()
+end
+
+end
+
+end
 local functions = {
 menu_show = menu.show,
 menu_volume_show = menu.volume_show,
@@ -125,7 +134,7 @@ battery_notify = battery.notify,
 net_notify = net.notify,
 
 exit = exit.show,
-to_urgent = connect.to_urgent,
+to_urgent = to_urgent,
 tag_prev = function() move_tag(-1) end,
 tag_next = function() move_tag(1) end,
 client_to_next = function() move_client(1) end,

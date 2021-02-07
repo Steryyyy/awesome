@@ -1,109 +1,75 @@
 local wibox = require("wibox")
 local gears = require("gears")
 local tcolor = require('tools.colors')
-local beautiful = require('beautiful')
+local awful = require('awful')
 
-return function (screen)
+local modkey = 'Mod4'
+return function (s)
 
-local widget = wibox.layout.flex.horizontal()
-widget.spacing = -12
-widget.screen = screen
-local urgent = {}
-local function taglistcolor(self, index)
-if not index then return end
-	self.bg = tcolor.get_color(index + 1, 'tg')
-	local s = widget.screen
-
-if not s.tags or not s.tags[index] then  return end
-		if s.tags[index].selected  then
-				self.bg = tcolor.get_color(1, 'tgs')
-
-
+	local function taglistcolor(self, index,t)
+		if not index then return end
+		self.bg = tcolor.get_color(index + 1, 'tg')
+		if t.selected  then
+			self.bg = tcolor.get_color(1, 'tgs')
+			t.urgent = false
+		elseif t.urgent then
+			self.bg = tcolor.get_color(3, 'tgs')
 		end
 
-	if urgent[index] then
 
-		self.bg = tcolor.get_color(3, 'tgs')
 	end
-end
-
-local function update()
-	local index = widget.screen.selected_tag
-	for i, a in pairs(widget.screen.tags) do
-		if i > 5 then return end
-		if a then
-			local c = widget:get_children()[i]
-			if c then taglistcolor(c, i)
-
-
-			end
-		end
-	end
-end
-local function draw()
-
-	for i, a in pairs(widget.screen.tags) do
-
-		if i > 5 then return end
-		if a then
-
-			local widge = wibox.widget {
-
+	local widget = awful.widget.taglist {
+		screen  = s,
+		filter  = function(t) return  t.index < 6  end,
+		style = {
+			shape = gears.shape.powerline
+		},
+		layout = {
+			spacing = -12,
+			layout  = wibox.layout.flex.horizontal
+		},
+		widget_template = {
+			{
 				{
-
-					{
-						id = 'text_role',
-						text = a.name,
-						font =beautiful.font_icon,
-						widget = wibox.widget.textbox
-					},
-
-					left = 20,
-					right = 15,
-					widget = wibox.container.margin
+					id = 'text_role',
+					widget = wibox.widget.textbox,
 				},
-				forced_width = 55,
-				widget = wibox.container.background
-
-			}
-			widge.shape = gears.shape.powerline
-			taglistcolor(widge, i)
-
-    widge:connect_signal("button::press", function(_,_,_,b)  if b == 1 then widget.screen.tags[i]:view_only()  end  end)
-widget:add(widge)
-		end
-
-	end
-end
-
-function widget.update() update() end
-tag.connect_signal("property::selected",function(t) if t and t.selected  then
-	if urgent[t.index] then  awesome.emit_signal('u',t.index,widget.screen.index)  end
-	update() end end)
-
-awesome.connect_signal("u", function(n,i)
-	if i ~= widget.screen.index then
-		return
-	end
-		urgent[n] = not urgent[n]
-
-		if not urgent[n] or widget.screen.selected_tag.index == n then
-
-			return
-		end
-
-		local chil = widget:get_children()
-		if chil then
-			if chil[n] then
-
-				chil[n].bg = tcolor.get_color(3,'tgs')
-
+				left  = 20,
+				right = 15,
+				widget = wibox.container.margin
+			},
+			forced_width = 55,
+			shape = gears.shape.powerline,
+			widget = wibox.container.background,
+			create_callback = function(self, t, index)
+				taglistcolor(self,index,t)
+			end,
+			update_callback = function(self, t, index)
+				taglistcolor(self,index,t)
+			end,
+		},
+		buttons = gears.table.join(
+		awful.button({ }, 1, function(t) t:view_only() end),
+		awful.button({ modkey }, 1, function(t)
+			if client.focus then
+				client.focus:move_to_tag(t)
 			end
+		end),
+		awful.button({ }, 3, awful.tag.viewtoggle),
+		awful.button({ modkey }, 3, function(t)
+			if client.focus then
+				client.focus:toggle_tag(t)
+			end
+		end)
+		)
+	}
+	function widget.update()
+		for i,a in pairs(widget.children) do
+			taglistcolor(a,i,s.tags[i])
 		end
 
-end)
+	end
 
-gears.timer.delayed_call(draw)
-return widget
+	return widget
 
 end

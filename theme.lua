@@ -7,6 +7,7 @@ theme.border_width = 5
 theme.fg_normal = '#ffffff'
 theme.font = settings.font
 theme.font_icon = settings.font_icon 
+theme.taglist_font = theme.font_icon
 theme.titlebar_close_button_normal = images.."/theme/blank.svg"
 theme.titlebar_close_button_focus = images.."/theme/blank.svg"
 theme.titlebar_close_button_normal_hover   =  images.."/theme/close_hover.svg"

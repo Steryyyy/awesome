@@ -3,7 +3,6 @@ local beautiful = require("beautiful")
 local get_term_dropdown = require('settings').terminal_dropdown_get
 local client_settings = require('settings').client
 local settings = require('settings').connect 
-local urgent = {}
 local floating_table = {
 	instance = {"copyq", "pinentry"},
 	class = {
@@ -14,14 +13,12 @@ local floating_table = {
 	role = {"AlarmWindow", "ConfigManager", "pop-up"}
 }
 next_floating = false
-for s in screen do
-urgent[s.index] = {}
-end
 
 local function move_and_toggle(c, t)
 	if (c.first_tag.index ~= t and not  (c.sticky) ) or c.screen ~= mouse.screen then
 		c:tags{c.screen.tags[t]}
-		awesome.emit_signal('u',t,c.screen.index)
+		c.screen.tags[t].urgent = true
+		-- c.urgent = true
 	end
 end
 local function set_default(c)
@@ -117,31 +114,6 @@ end)
 client.connect_signal("unfocus", function(c)
 	c.border_color = '#000000'
 end)
-local public ={}
-function public.to_urgent()
-	-- awful.client.urgent.jumpto()
-	for s in screen do
-		if s == mouse.screen then
-			if urgent[s.index] then
-
-				for i,t in pairs(s.tags) do
-					if urgent[s.index][i] then
-						t:view_only()
-						urgent[s.index][i] = nil
-						return
-					end
-				end
-
-			end
-		end
-	end
-end
-awesome.connect_signal("u", function(n,i)
-	if not urgent[i]  then
-		return
-	end
-	urgent[i][n] = not  urgent[i][n]
-end)
 local wibox = require('wibox')
 local gears = require ('gears')
 client.connect_signal('property::fullscreen',function(c)
@@ -156,7 +128,6 @@ end
 end )
 
 client.connect_signal("request::titlebars", function(c)
-    -- buttons for the titlebar
 c.titlebars_enabled = true
 local top = awful.titlebar(c,{size = 20 , position = "top"})
   local buttons = gears.table.join(
@@ -209,4 +180,3 @@ awesome.connect_signal('color_change', function() top.widget.bg = beautiful.bord
 	c.shape = client_settings.titlebars_shape
 end)
 
-return public
