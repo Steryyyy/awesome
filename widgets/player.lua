@@ -18,8 +18,7 @@ local icon_cmus = ''
 local get_vol = "pacmd list-sink-inputs | awk -f ~/.config/awesome/scripts/get_clients.awk  "
 -- local getspotufy_album = [[ curl "http://i.scdn.co/image/"$(sp art |  sed -e 's/^.*\///') > ~/.config/awesome/images/album.png ]]
 local get_spotify = [[
-    (sp status && sp current-oneline) | tr '\n' ' ' |  awk '{print $1"|"substr($0,index($0,$2))"|" }'
-
+dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.GetAll string:'org.mpris.MediaPlayer2.Player'  | grep -Ev '^method|Metadata' | grep -Eo '("(.*)")|(\b[0-9][a-zA-Z0-9.]*\b)|true|false' | sed '2~2 a |' | tr -d '\n' | sed -e 's/|/\n/g' | sed -e 's/^"//g' -e 's/"$//g' | sed -E 's/"+/|/g' | sed 's/xesam:\|mpris://g'| grep  "PlaybackStatus|\|artUrl|\|title|\|artist|" | awk -F '|' '{switch($1) {case "PlaybackStatus":play=$2; break; case "title": title=$2; break; case "artist": artist=$2; break; case "artUrl": art=$2; break; }  } END{print play"|"artist"|"title"|"art }'
 ]]
 local get_cmus = [[
     cmus-remote -Q | awk '/(status|file)/ {{gsub("^.*\\/","")}  a=a" "$0} END {{$0=a} {$1=""}{$2="|"$2"|"}{$NF=$NF"|"} print $0}'
@@ -37,7 +36,7 @@ widget_prev.font=beautiful.font_icon
 local widget_next = wibox.widget.textbox(icon_next)
 widget_next.font=beautiful.font_icon
 local widget_song = wibox.widget.textbox('')
-widget_song.font = (settings.player_font or beautiful.font )  
+widget_song.font = (settings.player_font or beautiful.font )
 local widget_spawn = wibox.widget.textbox(icon_spotify)
 widget_spawn.font =beautiful.font_icon
 
@@ -143,7 +142,7 @@ end
 end
 player.dec = function() change_volume(-5) end
 local function get_volume(play)
-    awful.spawn.easy_async_with_shell(get_vol .. "| grep '" .. play .. "'",
+    awful.spawn.easy_async_with_shell(get_vol .. "| grep -i '" .. play .. "'",
                                       function(out)
 
         local see = gears.string.split(out, '|')
@@ -247,10 +246,15 @@ end
 
 player.spotify_state = function()
     awful.spawn.easy_async_with_shell(get_spotify, function(out)
-
-        local arr = gears.string.split(out, '|')
-
-        if arr[1] ~= 'Error:' then
+        if out =="" then
+	player.hidebuton(false)
+	return
+	end
+	    local arr = gears.string.split(out, '|')
+	    if #arr<2 or arr[2] =="" then
+		    return
+	    end
+        if #arr >=3   then
             local stat = arr[1]
             if stat == 'Playing' then
                 widget_state.text = icon_pause
@@ -260,6 +264,10 @@ player.spotify_state = function()
 
             song.artist = arr[2]
             song.song = arr[3]
+	    if #arr >3 then
+	    local album = gears.string.split(arr[4],'/')
+	    	album = album[#album]
+    		end
             --[[
             awful.spawn.easy_async_with_shell(getspotufy_album, function()
                 song.cover = '~/.config/awesome/images/album.png'
@@ -267,7 +275,7 @@ player.spotify_state = function()
             end)
             --]]
 
-            get_volume('Spotify')
+            get_volume('spotify')
 
             player.trimsong(arr[3])
 
@@ -284,11 +292,13 @@ player.status = function()
     if player.selected == 'spotify' then
         widget_spawn.text = icon_spotify
         player.spotify_state()
-    elseif player.selected == 'cmus' then
+    else
         widget_spawn.text = icon_cmus
         player.cmus_state()
+--[[
 elseif player.selected == "musicpv" then
 player.musicpv_state()
+--]]
     end
 end
 

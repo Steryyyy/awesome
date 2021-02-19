@@ -179,14 +179,14 @@ iconbox.forced_width = 25
 
 				{
 					wibox.widget {
-						markup = title,
+						text = title,
 						font = beautiful.font,
 						align = 'left',
 						valign = 'center',
 						widget = wibox.widget.textbox
 					},
 					wibox.widget {
-						markup = text,
+						text = text,
 						font = beautiful.font,
 						align = 'left',
 						valign = 'center',
